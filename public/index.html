@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!--<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -206,7 +206,7 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 
     <div class="right-panel">
 
-      <!-- Server connection status -->
+      
       <div class="panel-card">
         <div class="panel-card-title">🖥️ Backend Status</div>
         <div class="panel-card-body" style="display:flex;flex-direction:column;gap:10px">
@@ -446,4 +446,573 @@ function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g
 checkServer();
 </script>
 </body>
+</html>-->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>VoiceAgent — AI Receptionist</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060912;--panel:#0d1220;--panel2:#111827;
+  --border:#1e2d45;--border2:#243450;
+  --blue:#3b82f6;--cyan:#06b6d4;--green:#22c55e;
+  --red:#ef4444;--amber:#f59e0b;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#475569;
+  --glow-blue:rgba(59,130,246,0.2);
+}
+html,body{height:100%;font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(59,130,246,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 0%,rgba(59,130,246,0.07) 0%,transparent 65%);pointer-events:none;z-index:0}
+.app{position:relative;z-index:1;min-height:100vh;display:grid;grid-template-rows:auto 1fr auto;max-width:1100px;margin:0 auto;padding:0 20px}
+
+/* TOPBAR */
+.topbar{padding:18px 0 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 20px var(--glow-blue)}
+.logo-text{font-size:1.1rem;font-weight:700;letter-spacing:-0.02em}
+.logo-text span{color:var(--cyan)}
+.topbar-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.agent-badge{display:flex;align-items:center;gap:6px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:6px;padding:5px 10px;font-size:0.7rem;font-family:'JetBrains Mono',monospace;color:var(--green)}
+.agent-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.model-tag{font-size:0.68rem;font-family:'JetBrains Mono',monospace;color:var(--text3);background:var(--panel2);border:1px solid var(--border);border-radius:4px;padding:4px 8px}
+
+/* CONTINUOUS TOGGLE */
+.cont-toggle{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer;transition:all 0.2s;font-size:0.75rem;color:var(--text2);user-select:none}
+.cont-toggle.on{border-color:rgba(34,197,94,0.4);color:var(--green);background:rgba(34,197,94,0.08)}
+.cont-dot{width:8px;height:8px;border-radius:50%;background:var(--text3);transition:all 0.2s;flex-shrink:0}
+.cont-toggle.on .cont-dot{background:var(--green);box-shadow:0 0 6px var(--green);animation:blink 1s ease infinite}
+
+/* TOAST */
+.toast{position:fixed;top:20px;right:20px;background:var(--panel);border:1px solid rgba(34,197,94,0.35);border-radius:12px;padding:12px 18px;font-size:0.82rem;color:var(--green);z-index:999;box-shadow:0 8px 32px rgba(0,0,0,0.5);animation:toastIn 0.3s ease both}
+.toast.out{animation:toastOut 0.3s ease both}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateX(20px)}}
+
+/* MAIN */
+.main{padding:24px 0;display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+
+/* ORB */
+.voice-panel{display:flex;flex-direction:column;gap:16px}
+.orb-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:40px 24px;display:flex;flex-direction:column;align-items:center;gap:20px;position:relative;overflow:hidden}
+.orb-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(59,130,246,0.05),transparent 70%)}
+.orb-wrap{position:relative;width:140px;height:140px;display:flex;align-items:center;justify-content:center}
+.orb-ring{position:absolute;border-radius:50%;border:1px solid;opacity:0.2;transition:all 0.4s}
+.orb-ring.r1{width:140px;height:140px;border-color:var(--blue);animation:orbIdle 3s ease-in-out infinite}
+.orb-ring.r2{width:110px;height:110px;border-color:var(--cyan);animation:orbIdle 3s ease-in-out infinite 0.4s}
+.orb-ring.r3{width:80px;height:80px;border-color:var(--blue);animation:orbIdle 3s ease-in-out infinite 0.8s}
+@keyframes orbIdle{0%,100%{transform:scale(1);opacity:0.2}50%{transform:scale(1.04);opacity:0.35}}
+.orb{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--cyan));position:relative;z-index:2;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.5rem;transition:all 0.3s;box-shadow:0 0 30px var(--glow-blue)}
+.orb:hover{transform:scale(1.05)}
+.orb:active{transform:scale(0.97)}
+.orb-wrap.LISTENING .orb-ring{border-color:var(--red);animation:orbListen 0.5s ease-in-out infinite alternate;opacity:0.7}
+.orb-wrap.LISTENING .orb{background:linear-gradient(135deg,var(--red),#f97316);box-shadow:0 0 40px rgba(239,68,68,0.4)}
+@keyframes orbListen{from{transform:scale(0.95)}to{transform:scale(1.1)}}
+.orb-wrap.THINKING .orb{background:linear-gradient(135deg,var(--amber),#f97316);animation:spin 1s linear infinite}
+.orb-wrap.THINKING .orb-ring{border-color:var(--amber);animation:orbIdle 1s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.orb-wrap.SPEAKING .orb{background:linear-gradient(135deg,var(--green),var(--cyan));box-shadow:0 0 40px rgba(34,197,94,0.35)}
+.orb-wrap.SPEAKING .orb-ring{border-color:var(--green);animation:orbSpeak 0.4s ease-in-out infinite alternate;opacity:0.7}
+@keyframes orbSpeak{from{transform:scale(0.96)}to{transform:scale(1.12)}}
+.orb-state-label{font-size:0.72rem;font-family:'JetBrains Mono',monospace;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);transition:color 0.3s}
+.orb-state-label.LISTENING{color:var(--red)}
+.orb-state-label.THINKING{color:var(--amber)}
+.orb-state-label.SPEAKING{color:var(--green)}
+.waveform{display:flex;align-items:center;gap:3px;height:32px}
+.waveform .bar{width:3px;background:var(--border2);border-radius:2px}
+.waveform.active .bar{background:linear-gradient(to top,var(--blue),var(--cyan))}
+.waveform.active .bar:nth-child(odd){animation:wave 0.7s ease-in-out infinite}
+.waveform.active .bar:nth-child(even){animation:wave 0.7s ease-in-out infinite 0.15s}
+@keyframes wave{0%,100%{height:4px}50%{height:22px}}
+
+/* TRANSCRIPT */
+.transcript-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.transcript-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.transcript-title{font-size:0.78rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text2)}
+.clear-btn{font-size:0.68rem;font-family:'JetBrains Mono',monospace;color:var(--text3);background:none;border:1px solid var(--border);border-radius:4px;padding:3px 8px;cursor:pointer;transition:all 0.2s}
+.clear-btn:hover{color:var(--red);border-color:rgba(239,68,68,0.4)}
+.transcript-body{height:280px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.empty-msg{margin:auto;text-align:center;color:var(--text3);font-size:0.82rem;line-height:1.8}
+.empty-icon{font-size:2rem;margin-bottom:8px;opacity:0.4}
+.msg{display:flex;flex-direction:column;gap:5px;animation:msgIn 0.25s ease-out both}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{align-items:flex-end}.msg.agent{align-items:flex-start}.msg.system{align-items:flex-start}
+.msg-who{font-size:0.62rem;font-family:'JetBrains Mono',monospace;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3)}
+.msg-text{max-width:85%;padding:10px 14px;border-radius:10px;font-size:0.82rem;line-height:1.6}
+.msg.user .msg-text{background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);color:var(--text);border-bottom-right-radius:3px}
+.msg.agent .msg-text{background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.15);color:#a5f3fc;border-bottom-left-radius:3px}
+.msg.system .msg-text{background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);color:var(--green);font-size:0.75rem;font-family:'JetBrains Mono',monospace;border-bottom-left-radius:3px}
+.typing-dots{display:flex;gap:5px;padding:10px 14px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.15);border-radius:10px;border-bottom-left-radius:3px}
+.typing-dots span{width:6px;height:6px;border-radius:50%;background:var(--cyan);opacity:0.4;animation:dot 1s ease-in-out infinite}
+.typing-dots span:nth-child(2){animation-delay:0.15s}.typing-dots span:nth-child(3){animation-delay:0.3s}
+@keyframes dot{0%,100%{opacity:0.4;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+.input-row{display:flex;gap:10px;padding:14px 16px;border-top:1px solid var(--border);background:var(--panel)}
+.text-inp{flex:1;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Outfit',sans-serif;font-size:0.84rem;outline:none;transition:border-color 0.2s}
+.text-inp:focus{border-color:rgba(59,130,246,0.4)}
+.text-inp::placeholder{color:var(--text3)}
+.send-btn{padding:10px 18px;background:linear-gradient(135deg,var(--blue),var(--cyan));border:none;border-radius:8px;color:#fff;font-family:'Outfit',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+.send-btn:hover{opacity:0.9;transform:translateY(-1px)}
+
+/* RIGHT PANEL */
+.right-panel{display:flex;flex-direction:column;gap:16px}
+.panel-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.panel-card-title{padding:13px 16px;border-bottom:1px solid var(--border);font-size:0.72rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);display:flex;align-items:center;gap:7px}
+.panel-card-body{padding:14px 16px}
+.conn-status{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;font-size:0.75rem;font-family:'JetBrains Mono',monospace}
+.conn-status.ok{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);color:var(--green)}
+.conn-status.err{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);color:var(--red)}
+.conn-status.checking{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);color:var(--amber)}
+.conn-dot{width:7px;height:7px;border-radius:50%;background:currentColor;animation:blink 2s ease infinite;flex-shrink:0}
+
+/* APP GRID */
+.app-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.app-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;background:var(--panel2);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all 0.2s;font-size:0.62rem;color:var(--text3);text-align:center}
+.app-btn:hover{border-color:rgba(59,130,246,0.4);color:var(--text);background:rgba(59,130,246,0.06);transform:translateY(-2px)}
+.app-icon{font-size:1.3rem}
+.voice-hint{font-size:0.65rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:8px;padding:6px 10px;background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.1);border-radius:6px;line-height:1.5}
+
+.faq-list{display:flex;flex-direction:column;gap:6px}
+.faq-item{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all 0.2s;font-size:0.78rem;color:var(--text2)}
+.faq-item:hover{border-color:rgba(59,130,246,0.35);color:var(--text);background:rgba(59,130,246,0.05)}
+.faq-icon{font-size:0.9rem;flex-shrink:0}
+.faq-arrow{margin-left:auto;opacity:0;transform:translateX(-4px);transition:all 0.2s;color:var(--cyan)}
+.faq-item:hover .faq-arrow{opacity:1;transform:translateX(0)}
+
+.cap-grid{display:flex;flex-wrap:wrap;gap:7px}
+.cap-chip{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;font-size:0.7rem;font-family:'JetBrains Mono',monospace;border:1px solid}
+.cap-chip.active{background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.25);color:var(--green)}
+.cap-chip.planned{background:rgba(245,158,11,0.06);border-color:rgba(245,158,11,0.2);color:var(--amber)}
+.cap-chip .cdot{width:5px;height:5px;border-radius:50%;background:currentColor}
+
+.statusbar{border-top:1px solid var(--border);padding:10px 0;display:flex;align-items:center;gap:20px;font-size:0.67rem;font-family:'JetBrains Mono',monospace;color:var(--text3)}
+.sb-item{display:flex;align-items:center;gap:5px}
+.sb-dot{width:5px;height:5px;border-radius:50%;background:var(--text3)}
+.sb-dot.ok{background:var(--green)}.sb-dot.warn{background:var(--amber)}
+#sb-state{color:var(--text2)}
+@media(max-width:700px){.main{grid-template-columns:1fr}.right-panel{order:-1}}
+</style>
+</head>
+<body>
+  
+<div class="app">
+
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-mark">🎙</div>
+      <div class="logo-text">Voice<span>Agent</span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="cont-toggle" id="contToggle" onclick="toggleContinuous()">
+        <div class="cont-dot"></div>
+        <span id="contLabel">Continuous: OFF</span>
+      </div>
+      <div class="agent-badge"><div class="agent-badge-dot"></div>AUTONOMOUS</div>
+      <div class="model-tag">gpt-4o · proxied</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="voice-panel">
+
+      <div class="orb-card">
+        <div class="orb-wrap IDLE" id="orbWrap">
+          <div class="orb-ring r1"></div><div class="orb-ring r2"></div><div class="orb-ring r3"></div>
+          <div class="orb" id="orbBtn" onclick="handleOrbClick()">🎙️</div>
+        </div>
+        <div class="waveform" id="waveform">
+          <div class="bar" style="height:6px"></div><div class="bar" style="height:10px"></div>
+          <div class="bar" style="height:14px"></div><div class="bar" style="height:8px"></div>
+          <div class="bar" style="height:18px"></div><div class="bar" style="height:10px"></div>
+          <div class="bar" style="height:22px"></div><div class="bar" style="height:12px"></div>
+          <div class="bar" style="height:16px"></div><div class="bar" style="height:8px"></div>
+          <div class="bar" style="height:12px"></div><div class="bar" style="height:6px"></div>
+        </div>
+        <div class="orb-state-label IDLE" id="stateLabel">IDLE — Click orb to speak</div>
+        <div style="font-size:0.82rem;color:var(--text2);text-align:center;max-width:280px;line-height:1.5" id="orbHint">
+          Click orb to speak. Turn on <b>Continuous</b> mode to keep listening after every response.
+        </div>
+      </div>
+
+      <div class="transcript-card">
+        <div class="transcript-header">
+          <div class="transcript-title">📋 Live Transcript</div>
+          <button class="clear-btn" onclick="clearChat()">Clear</button>
+        </div>
+        <div class="transcript-body" id="transcript">
+          <div class="empty-msg" id="emptyMsg">
+            <div class="empty-icon">💬</div>
+            Click the orb to speak,<br/>or type a question below.
+          </div>
+        </div>
+        <div class="input-row">
+          <input class="text-inp" id="textInp" placeholder="Or type… e.g. 'open YouTube'" onkeydown="if(event.key==='Enter')sendText()"/>
+          <button class="send-btn" onclick="sendText()">Send →</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="right-panel">
+
+      <div class="panel-card">
+        <div class="panel-card-title">🖥️ Backend Status</div>
+        <div class="panel-card-body">
+          <div class="conn-status checking" id="connStatus">
+            <div class="conn-dot"></div><span id="connText">Connecting…</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- APP LAUNCHER -->
+      <div class="panel-card">
+        <div class="panel-card-title">🚀 App Launcher</div>
+        <div class="panel-card-body">
+          <div class="app-grid">
+            <div class="app-btn" onclick="launchApp('youtube')"><div class="app-icon">▶️</div>YouTube</div>
+            <div class="app-btn" onclick="launchApp('whatsapp')"><div class="app-icon">💬</div>WhatsApp</div>
+            <div class="app-btn" onclick="launchApp('google')"><div class="app-icon">🔍</div>Google</div>
+            <div class="app-btn" onclick="launchApp('maps')"><div class="app-icon">🗺️</div>Maps</div>
+            <div class="app-btn" onclick="launchApp('calculator')"><div class="app-icon">🧮</div>Calculator</div>
+            <div class="app-btn" onclick="launchApp('gmail')"><div class="app-icon">📧</div>Gmail</div>
+            <div class="app-btn" onclick="launchApp('instagram')"><div class="app-icon">📸</div>Instagram</div>
+            <div class="app-btn" onclick="launchApp('twitter')"><div class="app-icon">🐦</div>Twitter</div>
+            <div class="app-btn" onclick="launchApp('spotify')"><div class="app-icon">🎵</div>Spotify</div>
+            <div class="app-btn" onclick="launchApp('netflix')"><div class="app-icon">🎬</div>Netflix</div>
+            <div class="app-btn" onclick="launchApp('github')"><div class="app-icon">💻</div>GitHub</div>
+            <div class="app-btn" onclick="launchApp('zoom')"><div class="app-icon">📹</div>Zoom</div>
+          </div>
+          <div class="voice-hint">🎙️ Say: "open YouTube", "launch WhatsApp",<br/>"open calculator", "go to Gmail"…</div>
+        </div>
+      </div>
+
+      <div class="panel-card">
+        <div class="panel-card-title">⚡ Quick Questions</div>
+        <div class="panel-card-body">
+          <div class="faq-list">
+            <div class="faq-item" onclick="fireQ(this)"><span class="faq-icon">🕐</span>What are your business hours?<span class="faq-arrow">→</span></div>
+            <div class="faq-item" onclick="fireQ(this)"><span class="faq-icon">📅</span>Book me an appointment<span class="faq-arrow">→</span></div>
+            <div class="faq-item" onclick="fireQ(this)"><span class="faq-icon">💼</span>What services do you offer?<span class="faq-arrow">→</span></div>
+            <div class="faq-item" onclick="fireQ(this)"><span class="faq-icon">🤝</span>Can I speak to a human?<span class="faq-arrow">→</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-card">
+        <div class="panel-card-title">🛠 Capabilities</div>
+        <div class="panel-card-body">
+          <div class="cap-grid">
+            <div class="cap-chip active"><div class="cdot"></div>Voice Input</div>
+            <div class="cap-chip active"><div class="cdot"></div>Voice Output</div>
+            <div class="cap-chip active"><div class="cdot"></div>Continuous Mode</div>
+            <div class="cap-chip active"><div class="cdot"></div>App Launcher</div>
+            <div class="cap-chip active"><div class="cdot"></div>FAQ Answers</div>
+            <div class="cap-chip active"><div class="cdot"></div>Appointments</div>
+            <div class="cap-chip active"><div class="cdot"></div>Secure Backend</div>
+            <div class="cap-chip planned"><div class="cdot"></div>Twilio Phone</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <div class="sb-item"><div class="sb-dot" id="dot-server"></div>Server</div>
+    <div class="sb-item"><div class="sb-dot" id="dot-stt"></div>STT</div>
+    <div class="sb-item"><div class="sb-dot ok"></div>TTS</div>
+    <div class="sb-item"><div class="sb-dot" id="dot-cont"></div>Continuous</div>
+    <div class="sb-item" style="margin-left:auto">State: <span id="sb-state">IDLE</span></div>
+    <div class="sb-item">Turns: <span id="sb-turns">0</span></div>
+  </div>
+
+</div>
+<script>
+// ── State ──────────────────────────────────────
+let state = 'IDLE';
+let chatHistory = [];
+let recognition = null;
+let turnCount = 0;
+let continuousMode = false;
+let continuousTimer = null;
+
+// ── App URLs ───────────────────────────────────
+const APP_URLS = {
+  youtube:'https://youtube.com', whatsapp:'https://web.whatsapp.com',
+  google:'https://google.com', maps:'https://maps.google.com',
+  calculator:'https://calculator.net', gmail:'https://mail.google.com',
+  instagram:'https://instagram.com', twitter:'https://twitter.com',
+  spotify:'https://open.spotify.com', netflix:'https://netflix.com',
+  github:'https://github.com', zoom:'https://zoom.us',
+  amazon:'https://amazon.com', linkedin:'https://linkedin.com',
+  reddit:'https://reddit.com', facebook:'https://facebook.com',
+  drive:'https://drive.google.com', slack:'https://slack.com',
+};
+
+// Voice keywords → app name
+const APP_KEYWORDS = {
+  youtube:['youtube','you tube','yt'],
+  whatsapp:['whatsapp','whats app'],
+  google:['google'],
+  maps:['maps','google maps','directions','navigate'],
+  calculator:['calculator','calc','calculate'],
+  gmail:['gmail','email','mail','inbox'],
+  instagram:['instagram','insta'],
+  twitter:['twitter','tweet','x app'],
+  spotify:['spotify','music','songs','play music'],
+  netflix:['netflix','movies','watch'],
+  github:['github','git hub'],
+  zoom:['zoom','meeting','video call'],
+  amazon:['amazon','shopping'],
+  linkedin:['linkedin'],
+  reddit:['reddit'],
+  facebook:['facebook','fb'],
+  drive:['drive','google drive'],
+  slack:['slack'],
+};
+
+function detectApp(text) {
+  const lower = text.toLowerCase();
+  const triggers = ['open','launch','go to','start','show','take me to','navigate to'];
+  if (!triggers.some(t => lower.includes(t))) return null;
+  for (const [app, keys] of Object.entries(APP_KEYWORDS)) {
+    if (keys.some(k => lower.includes(k))) return app;
+  }
+  return null;
+}
+
+function launchApp(app) {
+  const url = APP_URLS[app];
+  if (!url) return;
+  window.open(url, '_blank');
+  showToast('🚀 Opening ' + app.charAt(0).toUpperCase() + app.slice(1) + '...');
+  addMsg('system', '✅ Opened ' + app);
+}
+
+function showToast(msg) {
+  document.getElementById('_toast')?.remove();
+  const d = document.createElement('div');
+  d.id = '_toast'; d.className = 'toast'; d.textContent = msg;
+  document.body.appendChild(d);
+  setTimeout(() => { d.classList.add('out'); setTimeout(()=>d.remove(),300); }, 3000);
+}
+
+// ── Continuous Mode ────────────────────────────
+function toggleContinuous() {
+  continuousMode = !continuousMode;
+  const btn = document.getElementById('contToggle');
+  const lbl = document.getElementById('contLabel');
+  const dot = document.getElementById('dot-cont');
+  if (continuousMode) {
+    btn.classList.add('on'); lbl.textContent = 'Continuous: ON'; dot.classList.add('ok');
+    document.getElementById('orbHint').innerHTML = '🔄 <b>Continuous ON</b> — auto-listens after every response.';
+    if (state === 'IDLE') scheduleNextListen();
+  } else {
+    btn.classList.remove('on'); lbl.textContent = 'Continuous: OFF'; dot.classList.remove('ok');
+    document.getElementById('orbHint').innerHTML = 'Click orb to speak. Turn on <b>Continuous</b> mode to keep listening after every response.';
+    clearTimeout(continuousTimer);
+    if (state === 'LISTENING') { recognition?.stop(); setState('IDLE'); }
+  }
+}
+
+function scheduleNextListen() {
+  if (!continuousMode) return;
+  clearTimeout(continuousTimer);
+  // Short 1.5s pause then auto-restart listening
+  continuousTimer = setTimeout(() => {
+    if (continuousMode && state === 'IDLE') startListening();
+  }, 1500);
+}
+
+// ── State Machine ──────────────────────────────
+const ORB_ICONS = {IDLE:'🎙️',LISTENING:'⏹️',THINKING:'⚙️',SPEAKING:'🔊'};
+
+function setState(s) {
+  state = s;
+  document.getElementById('orbWrap').className = `orb-wrap ${s}`;
+  const lbl = document.getElementById('stateLabel');
+  lbl.className = `orb-state-label ${s}`;
+  lbl.textContent = {
+    IDLE: continuousMode ? 'CONTINUOUS — listening soon…' : 'IDLE — Click orb to speak',
+    LISTENING:'LISTENING — speak now…',
+    THINKING:'THINKING — processing…',
+    SPEAKING:'SPEAKING — playing response'
+  }[s];
+  document.getElementById('orbBtn').textContent = ORB_ICONS[s];
+  document.getElementById('sb-state').textContent = s;
+  document.getElementById('waveform').className = 'waveform'+(s==='LISTENING'||s==='SPEAKING'?' active':'');
+}
+
+// ── Health Check ───────────────────────────────
+async function checkServer() {
+  try {
+    const r = await fetch('/api/health');
+    if (r.ok) {
+      document.getElementById('connStatus').className = 'conn-status ok';
+      document.getElementById('connText').textContent = 'Server connected — GPT-4o ready';
+      document.getElementById('dot-server').classList.add('ok');
+      document.getElementById('dot-stt').classList.add(initSTT() ? 'ok' : 'warn');
+      const g = "Hi! I'm your AI assistant. I can answer questions, book appointments, and open any app for you. How can I help?";
+      addMsg('agent', g);
+      await speakText(g);
+      if (continuousMode) scheduleNextListen();
+    } else throw new Error();
+  } catch {
+    document.getElementById('connStatus').className = 'conn-status err';
+    document.getElementById('connText').textContent = 'Server offline — run node server.js';
+  }
+}
+
+// ── Backend Call ───────────────────────────────
+async function sendToServer(userText) {
+  chatHistory.push({ role:'user', content:userText });
+  const r = await fetch('/api/chat', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({messages:chatHistory})
+  });
+  if (!r.ok) { const e=await r.json(); throw new Error(e.error||`Error ${r.status}`); }
+  const data = await r.json();
+  chatHistory = data.messages;
+  return data.reply;
+}
+
+// ── Agent Turn ─────────────────────────────────
+async function runTurn(userText) {
+  // Check app launch first — no API call needed
+  const app = detectApp(userText);
+  if (app) {
+    launchApp(app);
+    const reply = `Opening ${app} for you right now!`;
+    addMsg('agent', reply);
+    setState('SPEAKING');
+    await speakText(reply);
+    setState('IDLE');
+    if (continuousMode) scheduleNextListen();
+    return;
+  }
+
+  setState('THINKING');
+  addTyping();
+  try {
+    const reply = await sendToServer(userText);
+    removeTyping();
+    turnCount++;
+    document.getElementById('sb-turns').textContent = turnCount;
+    addMsg('agent', reply);
+    setState('SPEAKING');
+    await speakText(reply);
+  } catch(e) {
+    removeTyping();
+    addMsg('agent', `⚠️ ${e.message}`);
+  }
+  setState('IDLE');
+  if (continuousMode) scheduleNextListen();
+}
+
+// ── Speech Recognition ─────────────────────────
+function initSTT() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return false;
+  recognition = new SR();
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.lang = 'en-US';
+  recognition.onresult = e => {
+    const t = e.results[0][0].transcript;
+    addMsg('user', t);
+    runTurn(t);
+  };
+  recognition.onerror = e => {
+    if (e.error !== 'no-speech') addMsg('agent', `⚠️ Mic: ${e.error}`);
+    setState('IDLE');
+    if (continuousMode) scheduleNextListen();
+  };
+  recognition.onend = () => { if (state==='LISTENING') setState('IDLE'); };
+  return true;
+}
+
+function startListening() {
+  if (state !== 'IDLE' || !recognition) return;
+  setState('LISTENING');
+  try { recognition.start(); } catch { recognition=null; initSTT(); recognition?.start(); }
+}
+
+function handleOrbClick() {
+  if (state==='LISTENING') { recognition?.stop(); setState('IDLE'); return; }
+  if (state !== 'IDLE') return;
+  if (!recognition) { alert('Use Chrome or Edge for voice input.'); return; }
+  clearTimeout(continuousTimer);
+  startListening();
+}
+
+// ── Text Input ─────────────────────────────────
+async function sendText() {
+  const inp = document.getElementById('textInp');
+  const t = inp.value.trim();
+  if (!t || state!=='IDLE') return;
+  inp.value = '';
+  addMsg('user', t);
+  await runTurn(t);
+}
+function fireQ(el) {
+  document.getElementById('textInp').value = el.textContent.replace('→','').trim().replace(/^[^\w]+/,'').trim();
+  sendText();
+}
+
+// ── TTS ────────────────────────────────────────
+function speakText(text) {
+  return new Promise(resolve => {
+    if (!window.speechSynthesis) { resolve(); return; }
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate=1.05; u.pitch=1.0; u.volume=1.0;
+    const v = window.speechSynthesis.getVoices();
+    const pick = v.find(x=>['Samantha','Karen','Google UK English Female','Aria'].some(n=>x.name.includes(n)))
+                 || v.find(x=>x.lang.startsWith('en')&&!x.name.toLowerCase().includes('male'))
+                 || v[0];
+    if (pick) u.voice=pick;
+    u.onend=resolve; u.onerror=resolve;
+    window.speechSynthesis.speak(u);
+  });
+}
+window.speechSynthesis?.addEventListener('voiceschanged',()=>{});
+
+// ── UI ─────────────────────────────────────────
+function addMsg(role, text) {
+  document.getElementById('emptyMsg')?.remove();
+  const t = document.getElementById('transcript');
+  const d = document.createElement('div');
+  d.className = `msg ${role}`;
+  const who = role==='user'?'👤 You':role==='system'?'⚙️ System':'🤖 Agent';
+  d.innerHTML=`<div class="msg-who">${who}</div><div class="msg-text">${esc(text)}</div>`;
+  t.appendChild(d); t.scrollTop=t.scrollHeight;
+}
+function addTyping() {
+  if (document.getElementById('typing')) return;
+  document.getElementById('emptyMsg')?.remove();
+  const t=document.getElementById('transcript');
+  const d=document.createElement('div');
+  d.className='msg agent'; d.id='typing';
+  d.innerHTML=`<div class="msg-who">🤖 Agent</div><div class="typing-dots"><span></span><span></span><span></span></div>`;
+  t.appendChild(d); t.scrollTop=t.scrollHeight;
+}
+function removeTyping(){document.getElementById('typing')?.remove()}
+function clearChat(){
+  document.getElementById('transcript').innerHTML='<div class="empty-msg" id="emptyMsg"><div class="empty-icon">💬</div>Cleared.</div>';
+  chatHistory=[];turnCount=0;document.getElementById('sb-turns').textContent='0';
+  window.speechSynthesis?.cancel();setState('IDLE');
+}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br/>')}
+
+checkServer();
+</script>
+</body>
 </html>
+
+
