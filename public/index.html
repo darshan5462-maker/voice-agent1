@@ -1015,7 +1015,7 @@ checkServer();
 </html>-->
 
 
-<!DOCTYPE html>
+<!--<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -1207,7 +1207,7 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
   <div class="main">
     <div class="voice-panel">
 
-      <!-- Emergency banner -->
+      
       <div class="emergency-bar" onclick="callEmergency()">
         <span class="e-icon">🚨</span>
         <span class="e-text">Medical Emergency? Free Ambulance anywhere in Karnataka</span>
@@ -1267,7 +1267,7 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
         </div>
       </div>
 
-      <!-- Districts quick select -->
+      
       <div class="panel-card">
         <div class="panel-card-title">📍 Select Your District</div>
         <div class="panel-card-body">
@@ -1288,7 +1288,7 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
         </div>
       </div>
 
-      <!-- Quick questions -->
+      
       <div class="panel-card">
         <div class="panel-card-title">⚡ Quick Questions</div>
         <div class="panel-card-body">
@@ -1302,7 +1302,7 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
         </div>
       </div>
 
-      <!-- Helplines -->
+      
       <div class="panel-card">
         <div class="panel-card-title">📞 Karnataka Helplines</div>
         <div class="panel-card-body">
@@ -1523,6 +1523,594 @@ function addTyping() {
 function removeTyping(){document.getElementById('typing')?.remove()}
 function clearChat(){
   document.getElementById('transcript').innerHTML='<div class="empty-msg" id="emptyMsg"><div class="empty-icon">🏥</div>Cleared.</div>';
+  chatHistory=[]; turnCount=0; document.getElementById('sb-turns').textContent='0';
+  window.speechSynthesis?.cancel(); if(!continuousMode) setState('IDLE');
+}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br/>')}
+
+checkServer();
+</script>
+</body>
+</html>-->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ShadowQuant — AI Voice Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#04050f;--panel:#080b1a;--panel2:#0c1024;
+  --border:#141830;--border2:#1e2645;
+  --violet:#7c3aed;--indigo:#4f46e5;--cyan:#06b6d4;
+  --pink:#ec4899;--green:#22c55e;--red:#ef4444;--amber:#f59e0b;
+  --text:#e8eaf6;--text2:#8892b0;--text3:#3d4a6e;
+  --glow-v:rgba(124,58,237,0.25);--glow-c:rgba(6,182,212,0.15);
+}
+html,body{height:100%;font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+
+/* Animated bg */
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 50% 40% at 20% 20%,rgba(124,58,237,0.08) 0%,transparent 60%),
+    radial-gradient(ellipse 40% 30% at 80% 80%,rgba(6,182,212,0.06) 0%,transparent 60%),
+    radial-gradient(ellipse 30% 30% at 50% 50%,rgba(79,70,229,0.04) 0%,transparent 70%);
+  pointer-events:none;z-index:0;
+}
+body::after{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(124,58,237,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(124,58,237,0.04) 1px,transparent 1px);
+  background-size:50px 50px;
+  pointer-events:none;z-index:0;
+}
+
+.app{position:relative;z-index:1;min-height:100vh;display:grid;grid-template-rows:auto 1fr auto;max-width:1140px;margin:0 auto;padding:0 20px}
+
+/* ── TOPBAR ── */
+.topbar{padding:16px 0 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-mark{
+  width:40px;height:40px;border-radius:10px;
+  background:linear-gradient(135deg,var(--violet),var(--cyan));
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+  box-shadow:0 0 24px var(--glow-v);
+  position:relative;overflow:hidden;
+}
+.logo-mark::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,0.15));
+}
+.logo-text{display:flex;flex-direction:column;gap:1px}
+.logo-name{
+  font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:900;
+  letter-spacing:0.06em;
+  background:linear-gradient(90deg,var(--violet),var(--cyan));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.logo-sub{font-size:0.58rem;font-family:'JetBrains Mono',monospace;color:var(--text3);letter-spacing:0.14em;text-transform:uppercase}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.sq-badge{display:flex;align-items:center;gap:6px;background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.3);border-radius:6px;padding:5px 11px;font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#a78bfa;letter-spacing:0.06em}
+.sq-dot{width:6px;height:6px;border-radius:50%;background:#a78bfa;animation:blink 2s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+.model-tag{font-size:0.62rem;font-family:'JetBrains Mono',monospace;color:var(--text3);background:var(--panel2);border:1px solid var(--border);border-radius:4px;padding:4px 8px}
+.toggle-wrap{display:flex;align-items:center;gap:7px;font-size:0.7rem;font-family:'JetBrains Mono',monospace;color:var(--text2)}
+.toggle{position:relative;width:36px;height:20px;cursor:pointer}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--border2);border-radius:20px;transition:0.3s}
+.toggle-slider::before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:#fff;border-radius:50%;transition:0.3s}
+.toggle input:checked+.toggle-slider{background:linear-gradient(90deg,var(--violet),var(--cyan))}
+.toggle input:checked+.toggle-slider::before{transform:translateX(16px)}
+
+.main{padding:20px 0;display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+
+/* ── ORB ── */
+.voice-panel{display:flex;flex-direction:column;gap:14px}
+.orb-card{
+  background:var(--panel);border:1px solid var(--border);border-radius:20px;
+  padding:40px 24px;display:flex;flex-direction:column;align-items:center;gap:20px;
+  position:relative;overflow:hidden;
+}
+.orb-card::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(124,58,237,0.06),transparent 70%);
+}
+
+/* Scan line effect */
+.orb-card::after{
+  content:'';position:absolute;top:-100%;left:0;right:0;height:30%;
+  background:linear-gradient(to bottom,transparent,rgba(124,58,237,0.03),transparent);
+  animation:scan 4s linear infinite;pointer-events:none;
+}
+@keyframes scan{to{top:200%}}
+
+.orb-wrap{position:relative;width:160px;height:160px;display:flex;align-items:center;justify-content:center}
+.orb-ring{position:absolute;border-radius:50%;border:1px solid;opacity:0}
+.orb-ring.r1{width:160px;height:160px;border-color:var(--violet);animation:orbPulse 3s ease-in-out infinite 0s}
+.orb-ring.r2{width:125px;height:125px;border-color:var(--cyan);animation:orbPulse 3s ease-in-out infinite 0.5s}
+.orb-ring.r3{width:92px;height:92px;border-color:var(--violet);animation:orbPulse 3s ease-in-out infinite 1s}
+@keyframes orbPulse{0%,100%{opacity:0.15;transform:scale(1)}50%{opacity:0.4;transform:scale(1.04)}}
+
+.orb{
+  width:70px;height:70px;border-radius:50%;
+  background:linear-gradient(135deg,var(--violet),var(--indigo),var(--cyan));
+  position:relative;z-index:2;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:1.6rem;
+  transition:all 0.3s;
+  box-shadow:0 0 30px var(--glow-v),0 0 60px var(--glow-c),inset 0 1px 0 rgba(255,255,255,0.2);
+}
+.orb:hover{transform:scale(1.08);box-shadow:0 0 50px var(--glow-v),0 0 80px var(--glow-c)}
+.orb:active{transform:scale(0.95)}
+
+/* State styles */
+.orb-wrap.LISTENING .orb-ring{border-color:var(--red);animation:orbListen 0.45s ease-in-out infinite alternate}
+.orb-wrap.LISTENING .orb-ring.r1{animation-delay:0s}
+.orb-wrap.LISTENING .orb-ring.r2{animation-delay:0.1s}
+.orb-wrap.LISTENING .orb-ring.r3{animation-delay:0.2s}
+.orb-wrap.LISTENING .orb{background:linear-gradient(135deg,var(--red),#f97316);box-shadow:0 0 50px rgba(239,68,68,0.5)}
+@keyframes orbListen{from{opacity:0.3;transform:scale(0.95)}to{opacity:0.9;transform:scale(1.12)}}
+
+.orb-wrap.THINKING .orb{background:linear-gradient(135deg,var(--amber),#f97316);animation:spin 1s linear infinite;box-shadow:0 0 50px rgba(245,158,11,0.4)}
+.orb-wrap.THINKING .orb-ring{border-color:var(--amber);animation:orbPulse 0.8s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.orb-wrap.SPEAKING .orb{background:linear-gradient(135deg,var(--green),var(--cyan));box-shadow:0 0 50px rgba(34,197,94,0.4)}
+.orb-wrap.SPEAKING .orb-ring{border-color:var(--green);animation:orbSpeak 0.35s ease-in-out infinite alternate}
+@keyframes orbSpeak{from{opacity:0.3;transform:scale(0.94)}to{opacity:0.9;transform:scale(1.14)}}
+
+.orb-wrap.CONTINUOUS .orb{background:linear-gradient(135deg,var(--pink),var(--violet));box-shadow:0 0 50px rgba(236,72,153,0.4);animation:continuousPulse 2s ease-in-out infinite}
+.orb-wrap.CONTINUOUS .orb-ring{border-color:var(--pink);animation:orbPulse 1.5s ease-in-out infinite}
+@keyframes continuousPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+
+.orb-state-label{
+  font-family:'JetBrains Mono',monospace;font-size:0.68rem;letter-spacing:0.15em;
+  text-transform:uppercase;color:var(--text3);transition:color 0.3s;text-align:center;
+}
+.orb-state-label.LISTENING{color:var(--red)}.orb-state-label.THINKING{color:var(--amber)}
+.orb-state-label.SPEAKING{color:var(--green)}.orb-state-label.CONTINUOUS{color:var(--pink)}
+.orb-state-label.IDLE{color:var(--violet);opacity:0.7}
+
+/* Waveform */
+.waveform{display:flex;align-items:center;gap:3px;height:30px}
+.waveform .bar{width:3px;background:var(--border2);border-radius:2px;transition:background 0.3s}
+.waveform.active .bar{background:linear-gradient(to top,var(--violet),var(--cyan))}
+.waveform.active .bar:nth-child(odd){animation:wave 0.6s ease-in-out infinite}
+.waveform.active .bar:nth-child(even){animation:wave 0.6s ease-in-out infinite 0.15s}
+@keyframes wave{0%,100%{height:4px}50%{height:24px}}
+
+.orb-hint{font-size:0.78rem;color:var(--text2);text-align:center;max-width:300px;line-height:1.6;font-family:'Rajdhani',sans-serif}
+.orb-hint b{color:#a78bfa}
+
+/* ── TRANSCRIPT ── */
+.transcript-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.transcript-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.transcript-title{font-family:'JetBrains Mono',monospace;font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2)}
+.clear-btn{font-size:0.65rem;font-family:'JetBrains Mono',monospace;color:var(--text3);background:none;border:1px solid var(--border);border-radius:4px;padding:3px 8px;cursor:pointer;transition:all 0.2s}
+.clear-btn:hover{color:var(--red);border-color:rgba(239,68,68,0.4)}
+.transcript-body{height:270px;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.empty-msg{margin:auto;text-align:center;color:var(--text3);font-size:0.8rem;line-height:2;font-family:'JetBrains Mono',monospace}
+.empty-icon{font-size:2.5rem;margin-bottom:8px;opacity:0.3}
+
+.msg{display:flex;flex-direction:column;gap:4px;animation:msgIn 0.25s ease-out both}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{align-items:flex-end}.msg.agent{align-items:flex-start}.msg.action{align-items:flex-start}
+.msg-who{font-size:0.58rem;font-family:'JetBrains Mono',monospace;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3)}
+.msg-text{max-width:90%;padding:10px 14px;border-radius:12px;font-size:0.85rem;line-height:1.65;font-family:'Rajdhani',sans-serif;font-weight:500}
+.msg.user .msg-text{background:rgba(79,70,229,0.12);border:1px solid rgba(79,70,229,0.25);color:var(--text);border-bottom-right-radius:3px}
+.msg.agent .msg-text{background:rgba(124,58,237,0.07);border:1px solid rgba(124,58,237,0.2);color:#c4b5fd;border-bottom-left-radius:3px}
+.msg.action .msg-text{background:rgba(6,182,212,0.07);border:1px solid rgba(6,182,212,0.2);color:#67e8f9;border-bottom-left-radius:3px}
+
+.typing-dots{display:flex;gap:5px;padding:10px 14px;background:rgba(124,58,237,0.07);border:1px solid rgba(124,58,237,0.2);border-radius:12px;border-bottom-left-radius:3px}
+.typing-dots span{width:6px;height:6px;border-radius:50%;background:#a78bfa;opacity:0.4;animation:dot 1s ease-in-out infinite}
+.typing-dots span:nth-child(2){animation-delay:0.15s}.typing-dots span:nth-child(3){animation-delay:0.3s}
+@keyframes dot{0%,100%{opacity:0.4;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+
+.input-row{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--border);background:var(--panel)}
+.text-inp{flex:1;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:0.9rem;font-weight:500;outline:none;transition:border-color 0.2s}
+.text-inp:focus{border-color:rgba(124,58,237,0.5)}
+.text-inp::placeholder{color:var(--text3)}
+.send-btn{padding:10px 18px;background:linear-gradient(135deg,var(--violet),var(--indigo));border:none;border-radius:8px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.04em}
+.send-btn:hover{opacity:0.9;transform:translateY(-1px);box-shadow:0 4px 20px var(--glow-v)}
+
+/* ── RIGHT PANEL ── */
+.right-panel{display:flex;flex-direction:column;gap:14px}
+.panel-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.panel-card-title{padding:12px 15px;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:0.68rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2);display:flex;align-items:center;gap:7px}
+.panel-card-body{padding:13px 15px}
+
+.conn-status{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:8px;font-size:0.7rem;font-family:'JetBrains Mono',monospace}
+.conn-status.ok{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);color:var(--green)}
+.conn-status.err{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);color:var(--red)}
+.conn-status.checking{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);color:var(--amber)}
+.conn-dot{width:7px;height:7px;border-radius:50%;background:currentColor;animation:blink 2s ease infinite;flex-shrink:0}
+
+/* Ask anything examples */
+.ask-grid{display:flex;flex-direction:column;gap:6px}
+.ask-item{display:flex;align-items:flex-start;gap:8px;padding:9px 11px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all 0.2s;font-size:0.78rem;color:var(--text2);font-family:'Rajdhani',sans-serif;font-weight:500;line-height:1.4}
+.ask-item:hover{border-color:rgba(124,58,237,0.4);color:var(--text);background:rgba(124,58,237,0.06);transform:translateX(3px)}
+.ask-icon{font-size:1rem;flex-shrink:0;margin-top:1px}
+
+/* App grid */
+.app-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.app-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 5px;background:var(--panel2);border:1px solid var(--border);border-radius:9px;cursor:pointer;transition:all 0.2s;font-size:0.6rem;color:var(--text2);text-align:center;font-family:'JetBrains Mono',monospace}
+.app-btn:hover{border-color:rgba(124,58,237,0.4);color:#a78bfa;background:rgba(124,58,237,0.06);transform:translateY(-2px)}
+.app-btn .ai{font-size:1.3rem}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.4);border-radius:10px;padding:10px 20px;font-size:0.75rem;color:#c4b5fd;font-family:'JetBrains Mono',monospace;transition:transform 0.3s ease;z-index:999;white-space:nowrap;backdrop-filter:blur(10px)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* Status bar */
+.statusbar{border-top:1px solid var(--border);padding:9px 0;display:flex;align-items:center;gap:18px;font-size:0.62rem;font-family:'JetBrains Mono',monospace;color:var(--text3)}
+.sb-item{display:flex;align-items:center;gap:5px}
+.sb-dot{width:5px;height:5px;border-radius:50%;background:var(--text3)}
+.sb-dot.ok{background:var(--green)}.sb-dot.warn{background:var(--amber)}
+#sb-state{color:#a78bfa}
+
+@media(max-width:720px){.main{grid-template-columns:1fr}.right-panel{order:-1}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-mark">⚡</div>
+      <div class="logo-text">
+        <div class="logo-name">ShadowQuant</div>
+        <div class="logo-sub">Autonomous Voice Intelligence</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="sq-badge"><div class="sq-dot"></div>ONLINE</div>
+      <div class="toggle-wrap">
+        <span>Continuous</span>
+        <label class="toggle">
+          <input type="checkbox" id="continuousToggle" onchange="toggleContinuous()"/>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="model-tag">gpt-4o</div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="voice-panel">
+
+      <div class="orb-card">
+        <div class="orb-wrap IDLE" id="orbWrap">
+          <div class="orb-ring r1"></div>
+          <div class="orb-ring r2"></div>
+          <div class="orb-ring r3"></div>
+          <div class="orb" id="orbBtn" onclick="handleOrbClick()">⚡</div>
+        </div>
+
+        <div class="waveform" id="waveform">
+          <div class="bar" style="height:5px"></div><div class="bar" style="height:9px"></div>
+          <div class="bar" style="height:13px"></div><div class="bar" style="height:7px"></div>
+          <div class="bar" style="height:18px"></div><div class="bar" style="height:10px"></div>
+          <div class="bar" style="height:22px"></div><div class="bar" style="height:12px"></div>
+          <div class="bar" style="height:16px"></div><div class="bar" style="height:8px"></div>
+          <div class="bar" style="height:12px"></div><div class="bar" style="height:5px"></div>
+        </div>
+
+        <div class="orb-state-label IDLE" id="stateLabel">IDLE — AWAITING COMMAND</div>
+
+        <div class="orb-hint">
+          Ask me <b>anything</b> — hospitals, hotels, restaurants,<br/>
+          weather, news, apps, general knowledge & more.
+        </div>
+      </div>
+
+      <!-- Transcript -->
+      <div class="transcript-card">
+        <div class="transcript-header">
+          <div class="transcript-title">⚡ Live Session</div>
+          <button class="clear-btn" onclick="clearChat()">Clear</button>
+        </div>
+        <div class="transcript-body" id="transcript">
+          <div class="empty-msg" id="emptyMsg">
+            <div class="empty-icon">⚡</div>
+            ShadowQuant is ready.<br/>Click the orb or type below.
+          </div>
+        </div>
+        <div class="input-row">
+          <input class="text-inp" id="textInp" placeholder='Ask anything — "Best hotels in Goa" "Open YouTube" "108 number"' onkeydown="if(event.key==='Enter')sendText()"/>
+          <button class="send-btn" onclick="sendText()">SEND</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel">
+
+      <!-- Status -->
+      <div class="panel-card">
+        <div class="panel-card-title">⚙️ System Status</div>
+        <div class="panel-card-body" style="display:flex;flex-direction:column;gap:10px">
+          <div class="conn-status checking" id="connStatus">
+            <div class="conn-dot"></div><span id="connText">Initializing ShadowQuant…</span>
+          </div>
+          <div style="font-size:0.65rem;color:var(--text3);font-family:'JetBrains Mono',monospace;line-height:1.7">
+            Ask about ANY city • ANY topic<br/>
+            Hospitals • Hotels • Food • Travel<br/>
+            Apps • Weather • Knowledge • More
+          </div>
+        </div>
+      </div>
+
+      <!-- Try asking -->
+      <div class="panel-card">
+        <div class="panel-card-title">💡 Try Asking</div>
+        <div class="panel-card-body">
+          <div class="ask-grid">
+            <div class="ask-item" onclick="fireQ(this)"><span class="ask-icon">🏥</span>Best hospitals in Mysuru Karnataka</div>
+            <div class="ask-item" onclick="fireQ(this)"><span class="ask-icon">🏨</span>Top hotels in Goa under 3000 rupees</div>
+            <div class="ask-item" onclick="fireQ(this)"><span class="ask-icon">🍽️</span>Best restaurants in Bangalore for biryani</div>
+            <div class="ask-item" onclick="fireQ(this)"><span class="ask-icon">✈️</span>Tourist places to visit in Coorg</div>
+            <div class="ask-item" onclick="fireQ(this)"><span class="ask-icon">🌦️</span>What is the weather in Hubli today</div>
+            <div class="ask-item" onclick="fireQ(this)"><span class="ask-icon">🚑</span>Emergency ambulance number Karnataka</div>
+            <div class="ask-item" onclick="fireQ(this)"><span class="ask-icon">📰</span>Latest technology news today</div>
+            <div class="ask-item" onclick="fireQ(this)"><span class="ask-icon">🧮</span>Calculate 25 percent of 4800</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- App launcher -->
+      <div class="panel-card">
+        <div class="panel-card-title">🚀 Quick Launch</div>
+        <div class="panel-card-body">
+          <div class="app-grid">
+            <div class="app-btn" onclick="launchApp('YouTube','https://www.youtube.com')"><span class="ai">▶️</span>YouTube</div>
+            <div class="app-btn" onclick="launchApp('WhatsApp','https://web.whatsapp.com')"><span class="ai">💬</span>WhatsApp</div>
+            <div class="app-btn" onclick="launchApp('Gmail','https://mail.google.com')"><span class="ai">📧</span>Gmail</div>
+            <div class="app-btn" onclick="launchApp('Maps','https://maps.google.com')"><span class="ai">🗺️</span>Maps</div>
+            <div class="app-btn" onclick="launchApp('Instagram','https://www.instagram.com')"><span class="ai">📸</span>Insta</div>
+            <div class="app-btn" onclick="launchApp('Zomato','https://www.zomato.com')"><span class="ai">🍕</span>Zomato</div>
+            <div class="app-btn" onclick="launchApp('Flipkart','https://www.flipkart.com')"><span class="ai">🛒</span>Flipkart</div>
+            <div class="app-btn" onclick="launchApp('IRCTC','https://www.irctc.co.in')"><span class="ai">🚂</span>IRCTC</div>
+            <div class="app-btn" onclick="launchApp('Spotify','https://open.spotify.com')"><span class="ai">🎵</span>Spotify</div>
+            <div class="app-btn" onclick="launchApp('Netflix','https://www.netflix.com')"><span class="ai">🎬</span>Netflix</div>
+            <div class="app-btn" onclick="launchApp('Calculator','https://calculator.net')"><span class="ai">🔢</span>Calc</div>
+            <div class="app-btn" onclick="launchApp('Translate','https://translate.google.com')"><span class="ai">🌐</span>Translate</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="statusbar">
+    <div class="sb-item"><div class="sb-dot" id="dot-server"></div>Server</div>
+    <div class="sb-item"><div class="sb-dot" id="dot-stt"></div>Voice</div>
+    <div class="sb-item"><div class="sb-dot ok"></div>GPT-4o</div>
+    <div class="sb-item" style="margin-left:auto">STATE: <span id="sb-state">IDLE</span></div>
+    <div class="sb-item">TURNS: <span id="sb-turns">0</span></div>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ──────────────────────────────────────
+let state = 'IDLE';
+let chatHistory = [];
+let recognition = null;
+let turnCount = 0;
+let continuousMode = false;
+let continuousActive = false;
+
+const ORB_ICONS  = {IDLE:'⚡',LISTENING:'👂',THINKING:'⚙️',SPEAKING:'🔊',CONTINUOUS:'🔄'};
+const ORB_LABELS = {
+  IDLE:'IDLE — AWAITING COMMAND',
+  LISTENING:'LISTENING — SPEAK NOW',
+  THINKING:'PROCESSING — PLEASE WAIT',
+  SPEAKING:'SPEAKING — PLAYING RESPONSE',
+  CONTINUOUS:'CONTINUOUS — ALWAYS LISTENING'
+};
+
+function setState(s) {
+  state = s;
+  document.getElementById('orbWrap').className = `orb-wrap ${s}`;
+  document.getElementById('stateLabel').className = `orb-state-label ${s}`;
+  document.getElementById('stateLabel').textContent = ORB_LABELS[s];
+  document.getElementById('orbBtn').textContent = ORB_ICONS[s];
+  document.getElementById('sb-state').textContent = s;
+  document.getElementById('waveform').className = 'waveform'+(s==='LISTENING'||s==='SPEAKING'?' active':'');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── Server check ───────────────────────────────
+async function checkServer() {
+  try {
+    const r = await fetch('/api/health');
+    if (r.ok) {
+      document.getElementById('connStatus').className = 'conn-status ok';
+      document.getElementById('connText').textContent = 'ShadowQuant Online — GPT-4o Ready';
+      document.getElementById('dot-server').classList.add('ok');
+      document.getElementById('dot-stt').classList.add(initSTT() ? 'ok' : 'warn');
+      const greeting = "Hey! ShadowQuant online. I can help you find hospitals, hotels, restaurants, tourist spots, answer any question, open apps, and much more. What do you need, friend?";
+      addMsg('agent', greeting);
+      speakText(greeting);
+    } else throw new Error();
+  } catch(e) {
+    document.getElementById('connStatus').className = 'conn-status err';
+    document.getElementById('connText').textContent = 'Offline — Start server.js first';
+  }
+}
+
+// ── Send to backend ────────────────────────────
+async function sendToServer(userText) {
+  chatHistory.push({ role: 'user', content: userText });
+  const r = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages: chatHistory })
+  });
+  if (!r.ok) { const e = await r.json(); throw new Error(e.error || `Error ${r.status}`); }
+  const data = await r.json();
+  chatHistory = data.messages;
+  if (data.actions?.length > 0) {
+    for (const a of data.actions) {
+      if (a.action === 'open_url') {
+        setTimeout(() => {
+          window.open(a.url, '_blank');
+          showToast(`⚡ Opening ${a.app_name}`);
+          addMsg('action', `⚡ Launched: ${a.app_name}`);
+        }, 700);
+      }
+    }
+  }
+  return data.reply;
+}
+
+// ── Agent turn ─────────────────────────────────
+async function runTurn(userText) {
+  setState('THINKING'); addTyping();
+  try {
+    const reply = await sendToServer(userText);
+    removeTyping(); turnCount++;
+    document.getElementById('sb-turns').textContent = turnCount;
+    if (reply) { addMsg('agent', reply); setState('SPEAKING'); await speakText(reply); }
+  } catch(e) { removeTyping(); addMsg('agent', `⚠️ ${e.message}`); }
+  if (continuousMode && continuousActive) { setState('CONTINUOUS'); setTimeout(startListeningOnce, 600); }
+  else setState('IDLE');
+}
+
+// ── Continuous mode ────────────────────────────
+function toggleContinuous() {
+  continuousMode = document.getElementById('continuousToggle').checked;
+  if (continuousMode) {
+    continuousActive = true;
+    showToast('🔄 Continuous mode ON — always listening!');
+    setState('CONTINUOUS');
+    setTimeout(startListeningOnce, 500);
+  } else {
+    continuousActive = false;
+    recognition?.stop();
+    setState('IDLE');
+    showToast('Continuous mode OFF');
+  }
+}
+
+function startListeningOnce() {
+  if (!continuousMode || !continuousActive || state==='THINKING' || state==='SPEAKING') return;
+  setState('LISTENING');
+  try { recognition?.start(); } catch(e) {}
+}
+
+// ── STT ────────────────────────────────────────
+function initSTT() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return false;
+  recognition = new SR();
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.lang = 'en-IN';
+  recognition.onresult = e => { const t = e.results[0][0].transcript; addMsg('user', t); runTurn(t); };
+  recognition.onerror = e => {
+    if (e.error === 'no-speech') {
+      if (continuousMode && continuousActive) { setState('CONTINUOUS'); setTimeout(startListeningOnce, 300); }
+      else setState('IDLE');
+      return;
+    }
+    if (e.error !== 'aborted') addMsg('agent', `⚠️ Mic error: ${e.error}`);
+    setState('IDLE');
+  };
+  recognition.onend = () => {
+    if (continuousMode && continuousActive && state==='LISTENING') { setState('CONTINUOUS'); setTimeout(startListeningOnce, 300); }
+    else if (state==='LISTENING') setState('IDLE');
+  };
+  return true;
+}
+
+function handleOrbClick() {
+  if (continuousMode) { document.getElementById('continuousToggle').checked=false; toggleContinuous(); return; }
+  if (state==='LISTENING') { recognition?.stop(); setState('IDLE'); return; }
+  if (state!=='IDLE') return;
+  if (!recognition) { alert('Please use Chrome or Edge browser for voice input.'); return; }
+  setState('LISTENING');
+  try { recognition.start(); } catch(e) { recognition=null; initSTT(); recognition?.start(); }
+}
+
+// ── Text input ─────────────────────────────────
+async function sendText() {
+  const inp = document.getElementById('textInp');
+  const t = inp.value.trim();
+  if (!t || state==='THINKING' || state==='SPEAKING') return;
+  inp.value = '';
+  if (continuousMode) recognition?.stop();
+  addMsg('user', t);
+  await runTurn(t);
+}
+
+function fireQ(el) {
+  document.getElementById('textInp').value = el.textContent.trim().replace(/^[^\w]+/,'').trim();
+  sendText();
+}
+
+function launchApp(name, url) {
+  window.open(url, '_blank');
+  showToast(`⚡ Opening ${name}`);
+  addMsg('action', `⚡ Launched: ${name}`);
+  speakText(`Opening ${name} for you!`);
+}
+
+// ── TTS ────────────────────────────────────────
+function speakText(text) {
+  return new Promise(resolve => {
+    if (!window.speechSynthesis) { resolve(); return; }
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate=1.05; u.pitch=1.0; u.volume=1.0; u.lang='en-IN';
+    const v = window.speechSynthesis.getVoices();
+    const pick = v.find(x=>x.lang==='en-IN')
+      || v.find(x=>['Samantha','Karen','Google UK English Female','Aria'].some(n=>x.name.includes(n)))
+      || v.find(x=>x.lang.startsWith('en')) || v[0];
+    if (pick) u.voice = pick;
+    u.onend=resolve; u.onerror=resolve;
+    window.speechSynthesis.speak(u);
+  });
+}
+window.speechSynthesis?.addEventListener('voiceschanged',()=>{});
+
+// ── UI ─────────────────────────────────────────
+function addMsg(role, text) {
+  document.getElementById('emptyMsg')?.remove();
+  const t = document.getElementById('transcript');
+  const d = document.createElement('div');
+  d.className = `msg ${role}`;
+  const who = role==='user'?'👤 YOU': role==='action'?'⚡ ACTION':'⚡ SHADOWQUANT';
+  d.innerHTML = `<div class="msg-who">${who}</div><div class="msg-text">${esc(text)}</div>`;
+  t.appendChild(d); t.scrollTop=t.scrollHeight;
+}
+function addTyping() {
+  if (document.getElementById('typing')) return;
+  document.getElementById('emptyMsg')?.remove();
+  const t = document.getElementById('transcript');
+  const d = document.createElement('div'); d.className='msg agent'; d.id='typing';
+  d.innerHTML=`<div class="msg-who">⚡ SHADOWQUANT</div><div class="typing-dots"><span></span><span></span><span></span></div>`;
+  t.appendChild(d); t.scrollTop=t.scrollHeight;
+}
+function removeTyping(){document.getElementById('typing')?.remove()}
+function clearChat(){
+  document.getElementById('transcript').innerHTML='<div class="empty-msg" id="emptyMsg"><div class="empty-icon">⚡</div>Session cleared.</div>';
   chatHistory=[]; turnCount=0; document.getElementById('sb-turns').textContent='0';
   window.speechSynthesis?.cancel(); if(!continuousMode) setState('IDLE');
 }
