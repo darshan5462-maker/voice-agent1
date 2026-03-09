@@ -447,7 +447,7 @@ app.listen(PORT, () => {
 
 
 
-require('dotenv').config();
+/*require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -811,6 +811,260 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅  AROGYAM Karnataka Hospital Assistant running at http://localhost:${PORT}`);
   console.log(`🔑  API key loaded: ${OPENAI_API_KEY.slice(0,8)}...`);
+});*/
+
+
+
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+
+const app = express();
+app.use(express.json());
+app.use(cors());
+
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+if (!OPENAI_API_KEY) {
+  console.error('❌  Missing OPENAI_API_KEY environment variable.');
+  process.exit(1);
+}
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+// ── App URL Map ────────────────────────────────
+const APP_URLS = {
+  youtube:'https://www.youtube.com', whatsapp:'https://web.whatsapp.com',
+  calculator:'https://calculator.net', google:'https://www.google.com',
+  gmail:'https://mail.google.com', maps:'https://maps.google.com',
+  googlemaps:'https://maps.google.com', facebook:'https://www.facebook.com',
+  instagram:'https://www.instagram.com', twitter:'https://www.twitter.com',
+  x:'https://www.x.com', netflix:'https://www.netflix.com',
+  spotify:'https://open.spotify.com', linkedin:'https://www.linkedin.com',
+  github:'https://www.github.com', zoom:'https://zoom.us',
+  notion:'https://www.notion.so', translate:'https://translate.google.com',
+  googletranslate:'https://translate.google.com', weather:'https://weather.com',
+  amazon:'https://www.amazon.com', flipkart:'https://www.flipkart.com',
+  paytm:'https://www.paytm.com', googledrive:'https://drive.google.com',
+  drive:'https://drive.google.com', docs:'https://docs.google.com',
+  sheets:'https://sheets.google.com', meet:'https://meet.google.com',
+  googlemeet:'https://meet.google.com', reddit:'https://www.reddit.com',
+  chatgpt:'https://chat.openai.com', wikipedia:'https://www.wikipedia.org',
+  stackoverflow:'https://stackoverflow.com', news:'https://news.google.com',
+  calendar:'https://calendar.google.com', telegram:'https://web.telegram.org',
+  discord:'https://discord.com/app', twitch:'https://www.twitch.tv',
+  tiktok:'https://www.tiktok.com', snapchat:'https://web.snapchat.com',
+  pinterest:'https://www.pinterest.com', zomato:'https://www.zomato.com',
+  swiggy:'https://www.swiggy.com', makemytrip:'https://www.makemytrip.com',
+  irctc:'https://www.irctc.co.in', ola:'https://www.olacabs.com',
+  uber:'https://www.uber.com', phonepe:'https://www.phonepe.com',
+  gpay:'https://pay.google.com',
+};
+
+// ── Tool Execution ─────────────────────────────
+function executeTool(name, args) {
+
+  // Web search — returns a Google search URL for the frontend to show
+  if (name === 'web_search') {
+    const query = args.query;
+    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+    // We return the search results as a message to GPT to answer from its knowledge
+    // For best hospitals/hotels, GPT already knows — this gives it context
+    return `Search query: "${query}". Please answer this from your knowledge about ${query}. Include top 3-5 specific recommendations with names, locations, and brief descriptions. Be specific and helpful.`;
+  }
+
+  // Open any app or website
+  if (name === 'open_application') {
+    const key = args.app_name.toLowerCase().replace(/\s+/g, '');
+    const url = APP_URLS[key] || `https://www.google.com/search?q=${encodeURIComponent(args.app_name)}`;
+    return JSON.stringify({ action: 'open_url', url, app_name: args.app_name });
+  }
+
+  // Get weather
+  if (name === 'get_weather') {
+    const city = args.city;
+    const url = `https://wttr.in/${encodeURIComponent(city)}?format=3`;
+    return JSON.stringify({ action: 'open_url', url: `https://weather.com/weather/today/l/${encodeURIComponent(city)}`, app_name: `Weather for ${city}`, weather_city: city });
+  }
+
+  // Set reminder (simulated)
+  if (name === 'set_reminder') {
+    return `Reminder set! I'll remind you: "${args.message}" at ${args.time}. (Note: browser reminders work while this tab is open)`;
+  }
+
+  // Calculate
+  if (name === 'calculate') {
+    try {
+      // Safe eval for basic math
+      const result = Function('"use strict"; return (' + args.expression.replace(/[^0-9+\-*/().% ]/g, '') + ')')();
+      return `The result of ${args.expression} is ${result}`;
+    } catch(e) {
+      return `Could not calculate: ${args.expression}`;
+    }
+  }
+
+  return 'Done.';
+}
+
+// ── OpenAI Functions ───────────────────────────
+const FUNCTIONS = [
+  {
+    name: 'web_search',
+    description: 'Search for any real-world information the user asks about — hospitals, hotels, restaurants, tourist places, shops, businesses, news, sports scores, any facts. Use this when user asks about best places, recommendations, current info, or anything location-specific.',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'The search query, e.g. "best hospitals in Mysuru Karnataka" or "top hotels in Goa"' }
+      },
+      required: ['query']
+    }
+  },
+  {
+    name: 'open_application',
+    description: 'Open any website or app in the browser when user says open, launch, go to, show me, take me to.',
+    parameters: {
+      type: 'object',
+      properties: {
+        app_name: { type: 'string', description: 'Name of the app or website to open' }
+      },
+      required: ['app_name']
+    }
+  },
+  {
+    name: 'get_weather',
+    description: 'Get weather information for any city when user asks about weather, temperature, rain forecast.',
+    parameters: {
+      type: 'object',
+      properties: {
+        city: { type: 'string', description: 'City name to get weather for' }
+      },
+      required: ['city']
+    }
+  },
+  {
+    name: 'calculate',
+    description: 'Perform mathematical calculations when user asks to calculate, compute, or solve math problems.',
+    parameters: {
+      type: 'object',
+      properties: {
+        expression: { type: 'string', description: 'Mathematical expression to evaluate, e.g. "25 * 4 + 100"' }
+      },
+      required: ['expression']
+    }
+  },
+  {
+    name: 'set_reminder',
+    description: 'Set a reminder for the user when they ask to be reminded about something.',
+    parameters: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', description: 'What to remind the user about' },
+        time: { type: 'string', description: 'When to remind — time or duration mentioned by user' }
+      },
+      required: ['message', 'time']
+    }
+  }
+];
+
+// ── System Prompt ──────────────────────────────
+const SYSTEM_PROMPT = `You are ShadowQuant, a powerful, intelligent and futuristic AI voice assistant. You are like a smarter version of Siri and Google Assistant combined.
+
+You can help with ANYTHING the user asks:
+- Find best hospitals, hotels, restaurants, tourist places in any city in India or worldwide
+- Answer general knowledge questions
+- Give news, sports, tech updates
+- Help with math, science, history, geography
+- Open any app or website
+- Give weather information
+- Tell jokes, stories, fun facts
+- Help with studies, coding, writing
+- Give health tips, fitness advice
+- Travel recommendations
+- Movie, music, book recommendations
+
+When user asks about best hospitals, hotels, restaurants or any place:
+- Use web_search tool to get context
+- Then give a helpful answer with TOP 3-5 specific recommendations
+- Include name, location, and why it is good
+- Always be specific — never say "I don't know" — give your best answer
+
+Personality:
+- You are futuristic, cool, confident and friendly
+- Speak like a smart AI assistant — not robotic, not too formal
+- Short responses — 2 to 4 sentences max when speaking
+- For lists (hospitals, hotels etc) give names clearly one by one
+- Always end by offering more help
+- Address the user as "friend" sometimes to be friendly
+- Never say you cannot help — always try your best
+
+Important: You serve users from ANYWHERE in India and worldwide. Always ask for city if location is needed.`;
+
+// ── Main Chat Endpoint ─────────────────────────
+app.post('/api/chat', async (req, res) => {
+  const { messages } = req.body;
+  if (!messages || !Array.isArray(messages)) return res.status(400).json({ error: 'messages array required' });
+
+  try {
+    let history = [...messages];
+    let finalText = '';
+    let actions = [];
+
+    while (true) {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_API_KEY}` },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...history],
+          functions: FUNCTIONS,
+          function_call: 'auto',
+          max_tokens: 600,
+          temperature: 0.7
+        })
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error?.message || `OpenAI error ${response.status}`);
+      }
+
+      const data = await response.json();
+      const msg = data.choices[0].message;
+      history.push(msg);
+
+      if (msg.function_call) {
+        let args = {};
+        try { args = JSON.parse(msg.function_call.arguments); } catch(e) {}
+        const result = executeTool(msg.function_call.name, args);
+
+        // Capture open_url actions
+        try {
+          const parsed = JSON.parse(result);
+          if (parsed.action === 'open_url') actions.push(parsed);
+        } catch(e) {}
+
+        history.push({ role: 'function', name: msg.function_call.name, content: result });
+        continue;
+      }
+
+      finalText = msg.content || '';
+      break;
+    }
+
+    res.json({ reply: finalText, actions, messages: history.filter(m => m.role !== 'system') });
+
+  } catch (err) {
+    console.error('[ERROR]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/health', (req, res) => res.json({ status: 'ok', agent: 'ShadowQuant', model: 'gpt-4o' }));
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`✅  ShadowQuant running at http://localhost:${PORT}`);
+  console.log(`🔑  API key: ${OPENAI_API_KEY.slice(0,8)}...`);
 });
 
 
