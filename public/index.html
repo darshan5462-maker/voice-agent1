@@ -449,7 +449,7 @@ checkServer();
 </html>-->
 
 
-<!DOCTYPE html>
+<!--<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -668,7 +668,7 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
         </div>
       </div>
 
-      <!-- APP LAUNCHER -->
+      
       <div class="panel-card">
         <div class="panel-card-title">🚀 App Launcher</div>
         <div class="panel-card-body">
@@ -1006,6 +1006,525 @@ function clearChat(){
   document.getElementById('transcript').innerHTML='<div class="empty-msg" id="emptyMsg"><div class="empty-icon">💬</div>Cleared.</div>';
   chatHistory=[];turnCount=0;document.getElementById('sb-turns').textContent='0';
   window.speechSynthesis?.cancel();setState('IDLE');
+}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br/>')}
+
+checkServer();
+</script>
+</body>
+</html>-->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AROGYAM — Karnataka Hospital Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#030d0a;--panel:#071912;--panel2:#0a2018;
+  --border:#0f3025;--border2:#1a4535;
+  --green:#22c55e;--teal:#14b8a6;--emerald:#10b981;
+  --blue:#3b82f6;--red:#ef4444;--amber:#f59e0b;--purple:#a855f7;
+  --text:#e2f5ec;--text2:#86b89a;--text3:#3d6b52;
+  --glow:rgba(34,197,94,0.2);
+}
+html,body{height:100%;font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(34,197,94,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(34,197,94,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 0%,rgba(16,185,129,0.07) 0%,transparent 65%);pointer-events:none;z-index:0}
+
+.app{position:relative;z-index:1;min-height:100vh;display:grid;grid-template-rows:auto 1fr auto;max-width:1100px;margin:0 auto;padding:0 20px}
+
+.topbar{padding:16px 0 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--emerald),var(--teal));display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 0 20px var(--glow)}
+.logo-text{display:flex;flex-direction:column;gap:1px}
+.logo-name{font-size:1.1rem;font-weight:800;letter-spacing:0.04em;color:var(--green)}
+.logo-sub{font-size:0.62rem;font-family:'JetBrains Mono',monospace;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.badge{display:flex;align-items:center;gap:6px;border-radius:6px;padding:5px 10px;font-size:0.68rem;font-family:'JetBrains Mono',monospace;letter-spacing:0.05em}
+.badge-green{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);color:var(--green)}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:blink 2s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.model-tag{font-size:0.65rem;font-family:'JetBrains Mono',monospace;color:var(--text3);background:var(--panel2);border:1px solid var(--border);border-radius:4px;padding:4px 8px}
+.toggle-wrap{display:flex;align-items:center;gap:7px;font-size:0.7rem;font-family:'JetBrains Mono',monospace;color:var(--text2)}
+.toggle{position:relative;width:36px;height:20px;cursor:pointer}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--border2);border-radius:20px;transition:0.3s}
+.toggle-slider::before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:#fff;border-radius:50%;transition:0.3s}
+.toggle input:checked + .toggle-slider{background:var(--emerald)}
+.toggle input:checked + .toggle-slider::before{transform:translateX(16px)}
+
+.main{padding:20px 0;display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+
+/* ── ORB ── */
+.voice-panel{display:flex;flex-direction:column;gap:16px}
+.orb-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:36px 24px;display:flex;flex-direction:column;align-items:center;gap:18px;position:relative;overflow:hidden}
+.orb-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(16,185,129,0.05),transparent 70%)}
+
+.orb-wrap{position:relative;width:140px;height:140px;display:flex;align-items:center;justify-content:center}
+.orb-ring{position:absolute;border-radius:50%;border:1px solid;opacity:0.2;transition:all 0.4s}
+.orb-ring.r1{width:140px;height:140px;border-color:var(--emerald);animation:orbIdle 3s ease-in-out infinite}
+.orb-ring.r2{width:110px;height:110px;border-color:var(--teal);animation:orbIdle 3s ease-in-out infinite 0.4s}
+.orb-ring.r3{width:80px;height:80px;border-color:var(--emerald);animation:orbIdle 3s ease-in-out infinite 0.8s}
+@keyframes orbIdle{0%,100%{transform:scale(1);opacity:0.2}50%{transform:scale(1.04);opacity:0.4}}
+.orb{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--emerald),var(--teal));position:relative;z-index:2;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.5rem;transition:all 0.3s;box-shadow:0 0 30px var(--glow)}
+.orb:hover{transform:scale(1.05)}
+.orb:active{transform:scale(0.97)}
+.orb-wrap.LISTENING .orb-ring{border-color:var(--red);animation:orbListen 0.5s ease-in-out infinite alternate;opacity:0.7}
+.orb-wrap.LISTENING .orb{background:linear-gradient(135deg,var(--red),#f97316);box-shadow:0 0 40px rgba(239,68,68,0.4)}
+@keyframes orbListen{from{transform:scale(0.95);opacity:0.4}to{transform:scale(1.1);opacity:0.9}}
+.orb-wrap.THINKING .orb{background:linear-gradient(135deg,var(--amber),#f97316);animation:spin 1s linear infinite}
+.orb-wrap.THINKING .orb-ring{border-color:var(--amber);animation:orbIdle 1s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.orb-wrap.SPEAKING .orb{background:linear-gradient(135deg,var(--green),var(--teal));box-shadow:0 0 40px rgba(34,197,94,0.4)}
+.orb-wrap.SPEAKING .orb-ring{border-color:var(--green);animation:orbSpeak 0.4s ease-in-out infinite alternate;opacity:0.7}
+@keyframes orbSpeak{from{transform:scale(0.96)}to{transform:scale(1.12)}}
+.orb-wrap.CONTINUOUS .orb{background:linear-gradient(135deg,var(--purple),var(--blue));box-shadow:0 0 40px rgba(168,85,247,0.35)}
+.orb-wrap.CONTINUOUS .orb-ring{border-color:var(--purple);animation:orbIdle 2s ease-in-out infinite;opacity:0.5}
+.orb-state-label{font-size:0.7rem;font-family:'JetBrains Mono',monospace;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);transition:color 0.3s;text-align:center}
+.orb-state-label.LISTENING{color:var(--red)}.orb-state-label.THINKING{color:var(--amber)}
+.orb-state-label.SPEAKING{color:var(--green)}.orb-state-label.CONTINUOUS{color:var(--purple)}
+
+.waveform{display:flex;align-items:center;gap:3px;height:28px}
+.waveform .bar{width:3px;background:var(--border2);border-radius:2px}
+.waveform.active .bar{background:linear-gradient(to top,var(--emerald),var(--teal))}
+.waveform.active .bar:nth-child(odd){animation:wave 0.7s ease-in-out infinite}
+.waveform.active .bar:nth-child(even){animation:wave 0.7s ease-in-out infinite 0.15s}
+@keyframes wave{0%,100%{height:4px}50%{height:22px}}
+
+/* ── EMERGENCY BANNER ── */
+.emergency-bar{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:10px 16px;display:flex;align-items:center;gap:10px;font-size:0.78rem;cursor:pointer;transition:all 0.2s}
+.emergency-bar:hover{background:rgba(239,68,68,0.14)}
+.emergency-bar .e-icon{font-size:1.2rem;flex-shrink:0}
+.emergency-bar .e-text{flex:1;color:var(--text2)}
+.emergency-bar .e-num{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;color:var(--red)}
+
+/* ── TRANSCRIPT ── */
+.transcript-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.transcript-header{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.transcript-title{font-size:0.75rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text2)}
+.clear-btn{font-size:0.65rem;font-family:'JetBrains Mono',monospace;color:var(--text3);background:none;border:1px solid var(--border);border-radius:4px;padding:3px 8px;cursor:pointer;transition:all 0.2s}
+.clear-btn:hover{color:var(--red);border-color:rgba(239,68,68,0.4)}
+.transcript-body{height:260px;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.empty-msg{margin:auto;text-align:center;color:var(--text3);font-size:0.8rem;line-height:1.8}
+.empty-icon{font-size:2rem;margin-bottom:8px;opacity:0.4}
+.msg{display:flex;flex-direction:column;gap:4px;animation:msgIn 0.25s ease-out both}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{align-items:flex-end}.msg.agent{align-items:flex-start}.msg.action{align-items:flex-start}
+.msg-who{font-size:0.6rem;font-family:'JetBrains Mono',monospace;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3)}
+.msg-text{max-width:88%;padding:9px 13px;border-radius:10px;font-size:0.8rem;line-height:1.6}
+.msg.user .msg-text{background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);color:var(--text);border-bottom-right-radius:3px}
+.msg.agent .msg-text{background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);color:#6ee7b7;border-bottom-left-radius:3px}
+.msg.action .msg-text{background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);color:#d8b4fe;border-bottom-left-radius:3px}
+.typing-dots{display:flex;gap:5px;padding:9px 13px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:10px;border-bottom-left-radius:3px}
+.typing-dots span{width:6px;height:6px;border-radius:50%;background:var(--emerald);opacity:0.4;animation:dot 1s ease-in-out infinite}
+.typing-dots span:nth-child(2){animation-delay:0.15s}.typing-dots span:nth-child(3){animation-delay:0.3s}
+@keyframes dot{0%,100%{opacity:0.4;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+.input-row{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--border);background:var(--panel)}
+.text-inp{flex:1;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:10px 13px;color:var(--text);font-family:'Outfit',sans-serif;font-size:0.82rem;outline:none;transition:border-color 0.2s}
+.text-inp:focus{border-color:rgba(16,185,129,0.4)}
+.text-inp::placeholder{color:var(--text3)}
+.send-btn{padding:10px 16px;background:linear-gradient(135deg,var(--emerald),var(--teal));border:none;border-radius:8px;color:#fff;font-family:'Outfit',sans-serif;font-size:0.8rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+.send-btn:hover{opacity:0.9;transform:translateY(-1px)}
+
+/* ── RIGHT PANEL ── */
+.right-panel{display:flex;flex-direction:column;gap:14px}
+.panel-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.panel-card-title{padding:12px 15px;border-bottom:1px solid var(--border);font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);display:flex;align-items:center;gap:7px}
+.panel-card-body{padding:13px 15px}
+.conn-status{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:8px;font-size:0.72rem;font-family:'JetBrains Mono',monospace}
+.conn-status.ok{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);color:var(--green)}
+.conn-status.err{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);color:var(--red)}
+.conn-status.checking{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);color:var(--amber)}
+.conn-dot{width:7px;height:7px;border-radius:50%;background:currentColor;animation:blink 2s ease infinite;flex-shrink:0}
+
+/* District grid */
+.district-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.district-btn{padding:8px 10px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all 0.2s;font-size:0.72rem;color:var(--text2);text-align:left;display:flex;align-items:center;gap:6px}
+.district-btn:hover{border-color:rgba(16,185,129,0.4);color:var(--text);background:rgba(16,185,129,0.05)}
+.district-btn .di{font-size:0.85rem}
+
+/* Quick questions */
+.faq-list{display:flex;flex-direction:column;gap:6px}
+.faq-item{display:flex;align-items:center;gap:8px;padding:8px 11px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all 0.2s;font-size:0.75rem;color:var(--text2)}
+.faq-item:hover{border-color:rgba(16,185,129,0.4);color:var(--text);background:rgba(16,185,129,0.05)}
+.faq-icon{font-size:0.9rem;flex-shrink:0}
+.faq-arrow{margin-left:auto;opacity:0;transform:translateX(-4px);transition:all 0.2s;color:var(--teal)}
+.faq-item:hover .faq-arrow{opacity:1;transform:translateX(0)}
+
+/* Helplines */
+.helpline-list{display:flex;flex-direction:column;gap:6px}
+.helpline-item{display:flex;align-items:center;justify-content:space-between;padding:8px 11px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;font-size:0.72rem}
+.helpline-name{color:var(--text2)}
+.helpline-num{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--green);font-size:0.8rem}
+
+.cap-grid{display:flex;flex-wrap:wrap;gap:6px}
+.cap-chip{display:flex;align-items:center;gap:5px;padding:4px 9px;border-radius:6px;font-size:0.65rem;font-family:'JetBrains Mono',monospace;border:1px solid}
+.cap-chip.active{background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.25);color:var(--green)}
+.cap-chip.new{background:rgba(168,85,247,0.08);border-color:rgba(168,85,247,0.25);color:var(--purple)}
+.cap-chip .cdot{width:5px;height:5px;border-radius:50%;background:currentColor}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.4);border-radius:10px;padding:10px 20px;font-size:0.78rem;color:#6ee7b7;font-family:'JetBrains Mono',monospace;transition:transform 0.3s ease;z-index:999;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+.statusbar{border-top:1px solid var(--border);padding:9px 0;display:flex;align-items:center;gap:18px;font-size:0.65rem;font-family:'JetBrains Mono',monospace;color:var(--text3)}
+.sb-item{display:flex;align-items:center;gap:5px}
+.sb-dot{width:5px;height:5px;border-radius:50%;background:var(--text3)}
+.sb-dot.ok{background:var(--green)}
+#sb-state{color:var(--text2)}
+
+@media(max-width:700px){.main{grid-template-columns:1fr}.right-panel{order:-1}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-mark">🏥</div>
+      <div class="logo-text">
+        <div class="logo-name">AROGYAM</div>
+        <div class="logo-sub">Karnataka Hospital Assistant</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="badge badge-green"><div class="badge-dot"></div>KARNATAKA</div>
+      <div class="toggle-wrap">
+        <span>Continuous</span>
+        <label class="toggle">
+          <input type="checkbox" id="continuousToggle" onchange="toggleContinuous()"/>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="model-tag">gpt-4o</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="voice-panel">
+
+      <!-- Emergency banner -->
+      <div class="emergency-bar" onclick="callEmergency()">
+        <span class="e-icon">🚨</span>
+        <span class="e-text">Medical Emergency? Free Ambulance anywhere in Karnataka</span>
+        <span class="e-num">108</span>
+      </div>
+
+      <div class="orb-card">
+        <div class="orb-wrap IDLE" id="orbWrap">
+          <div class="orb-ring r1"></div><div class="orb-ring r2"></div><div class="orb-ring r3"></div>
+          <div class="orb" id="orbBtn" onclick="handleOrbClick()">🎙️</div>
+        </div>
+        <div class="waveform" id="waveform">
+          <div class="bar" style="height:6px"></div><div class="bar" style="height:10px"></div>
+          <div class="bar" style="height:14px"></div><div class="bar" style="height:8px"></div>
+          <div class="bar" style="height:18px"></div><div class="bar" style="height:10px"></div>
+          <div class="bar" style="height:22px"></div><div class="bar" style="height:12px"></div>
+          <div class="bar" style="height:16px"></div><div class="bar" style="height:8px"></div>
+          <div class="bar" style="height:12px"></div><div class="bar" style="height:6px"></div>
+        </div>
+        <div class="orb-state-label IDLE" id="stateLabel">IDLE — Click orb to speak</div>
+        <div style="font-size:0.78rem;color:var(--text2);text-align:center;max-width:280px;line-height:1.5">
+          Ask about hospitals in <b style="color:var(--green)">any Karnataka city</b>.<br/>
+          Say your district and what help you need.
+        </div>
+      </div>
+
+      <div class="transcript-card">
+        <div class="transcript-header">
+          <div class="transcript-title">📋 Conversation</div>
+          <button class="clear-btn" onclick="clearChat()">Clear</button>
+        </div>
+        <div class="transcript-body" id="transcript">
+          <div class="empty-msg" id="emptyMsg">
+            <div class="empty-icon">🏥</div>
+            Say your city name and what<br/>medical help you need.
+          </div>
+        </div>
+        <div class="input-row">
+          <input class="text-inp" id="textInp" placeholder='e.g. "Hospitals in Mysuru" or "108 number"' onkeydown="if(event.key==='Enter')sendText()"/>
+          <button class="send-btn" onclick="sendText()">Send →</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="right-panel">
+
+      <div class="panel-card">
+        <div class="panel-card-title">🖥️ System Status</div>
+        <div class="panel-card-body" style="display:flex;flex-direction:column;gap:10px">
+          <div class="conn-status checking" id="connStatus">
+            <div class="conn-dot"></div><span id="connText">Connecting…</span>
+          </div>
+          <div style="font-size:0.65rem;color:var(--text3);font-family:'JetBrains Mono',monospace;line-height:1.6">
+            Covers all 31 Karnataka districts.<br/>Free government hospital info included.
+          </div>
+        </div>
+      </div>
+
+      <!-- Districts quick select -->
+      <div class="panel-card">
+        <div class="panel-card-title">📍 Select Your District</div>
+        <div class="panel-card-body">
+          <div class="district-grid">
+            <div class="district-btn" onclick="fireQ2('Hospitals in Bangalore')"><span class="di">🏙️</span>Bangalore</div>
+            <div class="district-btn" onclick="fireQ2('Hospitals in Mysuru')"><span class="di">🏛️</span>Mysuru</div>
+            <div class="district-btn" onclick="fireQ2('Hospitals in Davanagere')"><span class="di">🏥</span>Davanagere</div>
+            <div class="district-btn" onclick="fireQ2('Hospitals in Hubli Dharwad')"><span class="di">🏥</span>Hubli-Dharwad</div>
+            <div class="district-btn" onclick="fireQ2('Hospitals in Mangaluru')"><span class="di">🌊</span>Mangaluru</div>
+            <div class="district-btn" onclick="fireQ2('Hospitals in Belagavi')"><span class="di">🏥</span>Belagavi</div>
+            <div class="district-btn" onclick="fireQ2('Hospitals in Shivamogga')"><span class="di">🌿</span>Shivamogga</div>
+            <div class="district-btn" onclick="fireQ2('Hospitals in Kalaburagi')"><span class="di">🏥</span>Kalaburagi</div>
+            <div class="district-btn" onclick="fireQ2('Hospitals in Tumakuru')"><span class="di">🏥</span>Tumakuru</div>
+            <div class="district-btn" onclick="fireQ2('Hospitals in Ballari')"><span class="di">🏥</span>Ballari</div>
+            <div class="district-btn" onclick="fireQ2('Hospitals in Udupi Manipal')"><span class="di">🏥</span>Udupi</div>
+            <div class="district-btn" onclick="fireQ2('Hospitals in Hassan')"><span class="di">🏥</span>Hassan</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick questions -->
+      <div class="panel-card">
+        <div class="panel-card-title">⚡ Quick Questions</div>
+        <div class="panel-card-body">
+          <div class="faq-list">
+            <div class="faq-item" onclick="fireQ(this)"><span class="faq-icon">🚑</span>What is the emergency number?<span class="faq-arrow">→</span></div>
+            <div class="faq-item" onclick="fireQ(this)"><span class="faq-icon">🏛️</span>Tell me about Ayushman Bharat scheme<span class="faq-arrow">→</span></div>
+            <div class="faq-item" onclick="fireQ(this)"><span class="faq-icon">🩺</span>Best cardiac hospitals in Karnataka<span class="faq-arrow">→</span></div>
+            <div class="faq-item" onclick="fireQ(this)"><span class="faq-icon">📅</span>Book me a hospital appointment<span class="faq-arrow">→</span></div>
+            <div class="faq-item" onclick="fireQ(this)"><span class="faq-icon">🩸</span>Blood bank helpline number<span class="faq-arrow">→</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Helplines -->
+      <div class="panel-card">
+        <div class="panel-card-title">📞 Karnataka Helplines</div>
+        <div class="panel-card-body">
+          <div class="helpline-list">
+            <div class="helpline-item"><span class="helpline-name">🚑 Ambulance (Free)</span><span class="helpline-num">108</span></div>
+            <div class="helpline-item"><span class="helpline-name">🏥 Health Helpline</span><span class="helpline-num">104</span></div>
+            <div class="helpline-item"><span class="helpline-name">🩸 Blood Bank</span><span class="helpline-num">1910</span></div>
+            <div class="helpline-item"><span class="helpline-name">👩 Women Helpline</span><span class="helpline-num">181</span></div>
+            <div class="helpline-item"><span class="helpline-name">🏛️ Ayushman Bharat</span><span class="helpline-num">14555</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <div class="sb-item"><div class="sb-dot" id="dot-server"></div>Server</div>
+    <div class="sb-item"><div class="sb-dot" id="dot-stt"></div>Voice</div>
+    <div class="sb-item"><div class="sb-dot ok"></div>31 Districts</div>
+    <div class="sb-item" style="margin-left:auto">State: <span id="sb-state">IDLE</span></div>
+    <div class="sb-item">Turns: <span id="sb-turns">0</span></div>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+let state = 'IDLE';
+let chatHistory = [];
+let recognition = null;
+let turnCount = 0;
+let continuousMode = false;
+let continuousActive = false;
+
+const ORB_ICONS  = {IDLE:'🎙️',LISTENING:'👂',THINKING:'⚙️',SPEAKING:'🔊',CONTINUOUS:'🔄'};
+const ORB_LABELS = {IDLE:'IDLE — Click orb to speak',LISTENING:'LISTENING — speak now…',THINKING:'THINKING — processing…',SPEAKING:'SPEAKING — playing response',CONTINUOUS:'CONTINUOUS — always listening…'};
+
+function setState(s) {
+  state = s;
+  document.getElementById('orbWrap').className = `orb-wrap ${s}`;
+  document.getElementById('stateLabel').className = `orb-state-label ${s}`;
+  document.getElementById('stateLabel').textContent = ORB_LABELS[s];
+  document.getElementById('orbBtn').textContent = ORB_ICONS[s];
+  document.getElementById('sb-state').textContent = s;
+  document.getElementById('waveform').className = 'waveform'+(s==='LISTENING'||s==='SPEAKING'?' active':'');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function callEmergency() {
+  showToast('🚨 Emergency: Call 108 — Free Ambulance 24/7 Karnataka');
+  speakText('For medical emergencies in Karnataka, call 108 immediately. It is free and available 24 by 7 across all districts.');
+}
+
+async function checkServer() {
+  try {
+    const r = await fetch('/api/health');
+    if (r.ok) {
+      document.getElementById('connStatus').className = 'conn-status ok';
+      document.getElementById('connText').textContent = 'Connected — Karnataka DB ready';
+      document.getElementById('dot-server').classList.add('ok');
+      document.getElementById('dot-stt').classList.add(initSTT() ? 'ok' : 'warn');
+      const greeting = "Namaskara! I'm AROGYAM, your Karnataka hospital assistant. I can help you find hospitals in any district, share helpline numbers, explain health schemes, and book appointments. Which city are you in?";
+      addMsg('agent', greeting);
+      speakText(greeting);
+    } else throw new Error();
+  } catch(e) {
+    document.getElementById('connStatus').className = 'conn-status err';
+    document.getElementById('connText').textContent = 'Server offline — start server.js';
+  }
+}
+
+async function sendToServer(userText) {
+  chatHistory.push({ role: 'user', content: userText });
+  const r = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages: chatHistory })
+  });
+  if (!r.ok) { const e = await r.json(); throw new Error(e.error || `Server error ${r.status}`); }
+  const data = await r.json();
+  chatHistory = data.messages;
+  if (data.actions && data.actions.length > 0) {
+    for (const action of data.actions) {
+      if (action.action === 'open_url') {
+        setTimeout(() => { window.open(action.url, '_blank'); showToast(`🚀 Opening ${action.app_name}…`); addMsg('action', `🚀 Opened: ${action.app_name}`); }, 800);
+      }
+    }
+  }
+  return data.reply;
+}
+
+async function runTurn(userText) {
+  setState('THINKING'); addTyping();
+  try {
+    const reply = await sendToServer(userText);
+    removeTyping(); turnCount++;
+    document.getElementById('sb-turns').textContent = turnCount;
+    if (reply) addMsg('agent', reply);
+    setState('SPEAKING');
+    if (reply) await speakText(reply);
+  } catch(e) { removeTyping(); addMsg('agent', `⚠️ ${e.message}`); }
+  if (continuousMode && continuousActive) { setState('CONTINUOUS'); setTimeout(() => startListeningOnce(), 600); }
+  else setState('IDLE');
+}
+
+function toggleContinuous() {
+  continuousMode = document.getElementById('continuousToggle').checked;
+  if (continuousMode) {
+    continuousActive = true;
+    showToast('🔄 Continuous mode ON');
+    setState('CONTINUOUS');
+    setTimeout(() => startListeningOnce(), 500);
+  } else {
+    continuousActive = false;
+    recognition?.stop();
+    setState('IDLE');
+    showToast('Continuous mode OFF');
+  }
+}
+
+function startListeningOnce() {
+  if (!continuousMode || !continuousActive) return;
+  if (state === 'THINKING' || state === 'SPEAKING') return;
+  setState('LISTENING');
+  try { recognition?.start(); } catch(e) {}
+}
+
+function initSTT() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return false;
+  recognition = new SR();
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.lang = 'en-IN'; // Indian English for better Kannada accent recognition
+  recognition.onresult = e => { const t = e.results[0][0].transcript; addMsg('user', t); runTurn(t); };
+  recognition.onerror = e => {
+    if (e.error === 'no-speech') {
+      if (continuousMode && continuousActive) { setState('CONTINUOUS'); setTimeout(() => startListeningOnce(), 300); }
+      else setState('IDLE');
+      return;
+    }
+    if (e.error !== 'aborted') addMsg('agent', `⚠️ Mic: ${e.error}`);
+    setState('IDLE');
+  };
+  recognition.onend = () => {
+    if (continuousMode && continuousActive && state === 'LISTENING') { setState('CONTINUOUS'); setTimeout(() => startListeningOnce(), 300); }
+    else if (state === 'LISTENING') setState('IDLE');
+  };
+  return true;
+}
+
+function handleOrbClick() {
+  if (continuousMode) { document.getElementById('continuousToggle').checked = false; toggleContinuous(); return; }
+  if (state === 'LISTENING') { recognition?.stop(); setState('IDLE'); return; }
+  if (state !== 'IDLE') return;
+  if (!recognition) { alert('Use Chrome or Edge for voice input.'); return; }
+  setState('LISTENING');
+  try { recognition.start(); } catch(e) { recognition=null; initSTT(); recognition?.start(); }
+}
+
+async function sendText() {
+  const inp = document.getElementById('textInp');
+  const t = inp.value.trim();
+  if (!t || state === 'THINKING' || state === 'SPEAKING') return;
+  inp.value = '';
+  if (continuousMode) recognition?.stop();
+  addMsg('user', t);
+  await runTurn(t);
+}
+
+function fireQ(el) {
+  document.getElementById('textInp').value = el.textContent.replace('→','').trim().replace(/^[^\w]+/,'').trim();
+  sendText();
+}
+
+function fireQ2(text) {
+  document.getElementById('textInp').value = text;
+  sendText();
+}
+
+function speakText(text) {
+  return new Promise(resolve => {
+    if (!window.speechSynthesis) { resolve(); return; }
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate=1.0; u.pitch=1.0; u.volume=1.0; u.lang='en-IN';
+    const v = window.speechSynthesis.getVoices();
+    const pick = v.find(x=>x.lang==='en-IN') || v.find(x=>['Samantha','Karen','Google UK English Female','Aria'].some(n=>x.name.includes(n))) || v.find(x=>x.lang.startsWith('en')) || v[0];
+    if (pick) u.voice = pick;
+    u.onend=resolve; u.onerror=resolve;
+    window.speechSynthesis.speak(u);
+  });
+}
+window.speechSynthesis?.addEventListener('voiceschanged',()=>{});
+
+function addMsg(role, text) {
+  document.getElementById('emptyMsg')?.remove();
+  const t = document.getElementById('transcript');
+  const d = document.createElement('div');
+  d.className = `msg ${role}`;
+  d.innerHTML = `<div class="msg-who">${role==='user'?'👤 You':role==='action'?'🚀 Action':'🏥 AROGYAM'}</div><div class="msg-text">${esc(text)}</div>`;
+  t.appendChild(d); t.scrollTop=t.scrollHeight;
+}
+function addTyping() {
+  if (document.getElementById('typing')) return;
+  document.getElementById('emptyMsg')?.remove();
+  const t = document.getElementById('transcript');
+  const d = document.createElement('div'); d.className='msg agent'; d.id='typing';
+  d.innerHTML=`<div class="msg-who">🏥 AROGYAM</div><div class="typing-dots"><span></span><span></span><span></span></div>`;
+  t.appendChild(d); t.scrollTop=t.scrollHeight;
+}
+function removeTyping(){document.getElementById('typing')?.remove()}
+function clearChat(){
+  document.getElementById('transcript').innerHTML='<div class="empty-msg" id="emptyMsg"><div class="empty-icon">🏥</div>Cleared.</div>';
+  chatHistory=[]; turnCount=0; document.getElementById('sb-turns').textContent='0';
+  window.speechSynthesis?.cancel(); if(!continuousMode) setState('IDLE');
 }
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br/>')}
 
