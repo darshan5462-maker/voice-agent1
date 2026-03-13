@@ -1068,7 +1068,7 @@ app.listen(PORT, () => {
 });*/
 
 
-require('dotenv').config();
+/*require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -1564,6 +1564,600 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅  ShadowQuant Clinic Agent v2.0 — http://localhost:${PORT}`);
   console.log(`📋  Google Sheets: ${GOOGLE_SHEETS_ID ? '✅ Connected' : '⚠️  Not configured (set GOOGLE_SHEETS_ID)'}`);
+});*/
+
+
+
+require('dotenv').config();
+const express = require('express');
+const cors    = require('cors');
+const path    = require('path');
+
+const app = express();
+app.use(express.json());
+app.use(cors());
+app.use(express.static(path.join(__dirname, 'public')));
+
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+if (!OPENAI_API_KEY) { console.error('❌ Missing OPENAI_API_KEY'); process.exit(1); }
+
+/* ═══════════════════════════════════════════════════════
+   DENTAL CLINIC DATA
+═══════════════════════════════════════════════════════ */
+const CLINIC = {
+  name: "BrightSmile Dental Clinic",
+  address: "42 MG Road, Indiranagar, Bangalore — 560038",
+  phone: "+91-80-4123-9900",
+  emergency: "108",
+  whatsapp: process.env.CLINIC_WHATSAPP || "+918041239900",
+  schedule: {
+    monday:    { open:true,  slots:["09:00","09:30","10:00","10:30","11:00","11:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30"] },
+    tuesday:   { open:true,  slots:["09:00","09:30","10:00","10:30","11:00","11:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30"] },
+    wednesday: { open:true,  slots:["09:00","09:30","10:00","10:30","11:00","11:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30"] },
+    thursday:  { open:true,  slots:["09:00","09:30","10:00","10:30","11:00","11:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30"] },
+    friday:    { open:true,  slots:["09:00","09:30","10:00","10:30","11:00","11:30","14:00","14:30","15:00","15:30","16:00"] },
+    saturday:  { open:true,  slots:["10:00","10:30","11:00","11:30","12:00","12:30"] },
+    sunday:    { open:false, slots:[] }
+  },
+  doctors: {
+    general:    "Dr. Priya Nair",
+    orthodontic:"Dr. Karan Mehta",
+    pediatric:  "Dr. Lakshmi Rao",
+    cosmetic:   "Dr. Arun Sharma",
+    emergency:  "Dr. On-Call"
+  },
+  services: {
+    "checkup":     { doctor:"general",     duration:30, price:"₹500" },
+    "cleaning":    { doctor:"general",     duration:45, price:"₹800" },
+    "filling":     { doctor:"general",     duration:60, price:"₹1,200–₹2,500" },
+    "rootcanal":   { doctor:"general",     duration:90, price:"₹4,000–₹8,000" },
+    "braces":      { doctor:"orthodontic", duration:60, price:"₹35,000–₹80,000" },
+    "whitening":   { doctor:"cosmetic",    duration:60, price:"₹3,500" },
+    "pediatric":   { doctor:"pediatric",   duration:30, price:"₹500" },
+    "extraction":  { doctor:"general",     duration:45, price:"₹800–₹2,000" },
+    "emergency":   { doctor:"emergency",   duration:30, price:"₹1,000" }
+  }
+};
+
+const bookings    = [];
+const escalations = [];
+const emergencies = [];
+
+/* ═══════════════════════════════════════════════════════
+   NOTIFICATION ENGINE
+   Priority order: Twilio SMS/WhatsApp → Telegram → Log-only
+═══════════════════════════════════════════════════════ */
+async function sendNotification({ to, message, channel = 'auto', patientName = '' }) {
+  const results = {};
+
+  /* ── Twilio SMS ─── */
+  if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_FROM_NUMBER) {
+    try {
+      const client = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+      const toNum  = to.startsWith('+') ? to : '+91' + to.replace(/\D/g,'');
+
+      if (channel === 'whatsapp' || channel === 'auto') {
+        // WhatsApp via Twilio sandbox
+        try {
+          await client.messages.create({
+            from: `whatsapp:${process.env.TWILIO_FROM_NUMBER}`,
+            to:   `whatsapp:${toNum}`,
+            body: message
+          });
+          results.whatsapp = 'sent';
+          console.log(`[WhatsApp] → ${toNum}`);
+        } catch(e) {
+          console.log(`[WhatsApp] Failed, falling back to SMS: ${e.message}`);
+        }
+      }
+
+      if ((channel === 'sms' || channel === 'auto') && !results.whatsapp) {
+        await client.messages.create({
+          from: process.env.TWILIO_FROM_NUMBER,
+          to:   toNum,
+          body: message
+        });
+        results.sms = 'sent';
+        console.log(`[SMS] → ${toNum}`);
+      }
+    } catch(e) {
+      console.error('[Twilio]', e.message);
+      results.twilio_error = e.message;
+    }
+  }
+
+  /* ── Telegram ─── */
+  if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
+    try {
+      const chatId = process.env.TELEGRAM_CHAT_ID;
+      const token  = process.env.TELEGRAM_BOT_TOKEN;
+      await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'HTML' })
+      });
+      results.telegram = 'sent';
+      console.log(`[Telegram] → chat ${chatId}`);
+    } catch(e) {
+      console.error('[Telegram]', e.message);
+      results.telegram_error = e.message;
+    }
+  }
+
+  /* ── Fallback: log only ─── */
+  if (!results.sms && !results.whatsapp && !results.telegram) {
+    console.log(`\n📢 [NOTIFICATION WOULD SEND TO: ${to}]\n${message}\n`);
+    results.logged = true;
+  }
+
+  return results;
+}
+
+/* ═══════════════════════════════════════════════════════
+   EMERGENCY DISPATCH
+   Triggered when critical symptoms detected during call
+═══════════════════════════════════════════════════════ */
+async function dispatchEmergency({ lat, lng, address, patientName, phone, symptoms, sessionId }) {
+  const ts = new Date().toISOString();
+  const locationStr = (lat && lng)
+    ? `GPS: ${lat.toFixed(5)},${lng.toFixed(5)} — https://maps.google.com/?q=${lat},${lng}`
+    : (address || 'Location not available');
+
+  const emergency = {
+    id: 'EMG-' + Date.now().toString(36).toUpperCase().slice(-6),
+    patient: patientName || 'Unknown',
+    phone: phone || 'N/A',
+    symptoms, location: locationStr, lat, lng,
+    sessionId, ts, status: 'dispatched'
+  };
+  emergencies.push(emergency);
+
+  const alertMsg = [
+    `🚨 DENTAL EMERGENCY ALERT — ${emergency.id}`,
+    `Patient: ${emergency.patient}`,
+    `Phone: ${emergency.phone}`,
+    `Symptoms: ${symptoms}`,
+    `Location: ${locationStr}`,
+    `Time: ${new Date().toLocaleString('en-IN')}`,
+    `→ Dispatching ambulance to patient location`,
+    `→ Alerting Dr. On-Call at ${CLINIC.phone}`
+  ].join('\n');
+
+  console.error('\n' + '='.repeat(60));
+  console.error(alertMsg);
+  console.error('='.repeat(60) + '\n');
+
+  // Notify clinic staff
+  const notifResults = await sendNotification({
+    to: process.env.CLINIC_EMERGENCY_PHONE || CLINIC.phone,
+    message: alertMsg,
+    channel: 'auto'
+  });
+
+  // Also notify patient (if phone known)
+  if (phone && phone !== 'N/A') {
+    await sendNotification({
+      to: phone,
+      message: `🚨 BrightSmile Clinic Emergency Response: We have alerted emergency services (108) to your location. Help is on the way. Stay calm. Our on-call doctor has been notified. Call 108 if not reached within 5 minutes.`,
+      channel: 'auto'
+    });
+  }
+
+  // Send Google Sheets row for emergency
+  await writeToSheets({
+    ref: emergency.id, patient: emergency.patient, phone: emergency.phone,
+    day: 'EMERGENCY', time: new Date().toLocaleTimeString('en-IN'),
+    doctor: 'Dr. On-Call', service: 'EMERGENCY DISPATCH', urgency: 'critical',
+  });
+
+  return {
+    emergency_id: emergency.id,
+    status: 'dispatched',
+    location: locationStr,
+    notified: notifResults,
+    message: `Emergency services alerted. ID: ${emergency.id}. Ambulance dispatched to your location. Our on-call doctor has been notified. Please stay calm and call 108 directly if needed.`
+  };
+}
+
+/* ═══════════════════════════════════════════════════════
+   GOOGLE SHEETS INTEGRATION
+═══════════════════════════════════════════════════════ */
+async function writeToSheets(row) {
+  if (!process.env.GOOGLE_SHEETS_ID || !process.env.GOOGLE_SERVICE_ACCOUNT) return { ok: false };
+  try {
+    const { google } = require('googleapis');
+    const creds = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
+    const auth  = new google.auth.GoogleAuth({ credentials:creds, scopes:['https://www.googleapis.com/auth/spreadsheets'] });
+    const sheets = google.sheets({ version:'v4', auth });
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: process.env.GOOGLE_SHEETS_ID,
+      range: 'Sheet1!A:I',
+      valueInputOption: 'USER_ENTERED',
+      requestBody: { values: [[row.ref,row.patient,row.phone,row.day,row.time,row.doctor,row.service,row.urgency,new Date().toLocaleString('en-IN')]] }
+    });
+    return { ok: true };
+  } catch(e) { console.error('[Sheets]', e.message); return { ok:false }; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   TOOL EXECUTION ENGINE
+═══════════════════════════════════════════════════════ */
+async function executeTool(name, args) {
+
+  /* ── 1. ASSESS URGENCY ─────────────────────────────── */
+  if (name === 'assess_urgency') {
+    const s = (args.symptoms||'').toLowerCase();
+    const CRITICAL = ['severe pain','unbearable','jaw broken','swelling face','bleeding heavily','knocked out','abscess','can not breathe','face swelling','cannot breathe','chest pain','unconscious','stroke','collapsed'];
+    const HIGH     = ['bad pain','toothache','broken tooth','chipped tooth','lost filling','pain eating','sensitivity extreme'];
+    const MEDIUM   = ['mild pain','sensitivity','gum bleeding','bad breath'];
+    let level = 'low', action = 'routine_booking';
+    if (CRITICAL.some(k => s.includes(k))) { level='critical'; action='emergency'; }
+    else if (HIGH.some(k => s.includes(k))) { level='high'; action='priority_booking'; }
+    else if (MEDIUM.some(k => s.includes(k))) { level='medium'; action='routine_booking'; }
+    if (level === 'critical') escalations.push({ symptoms:args.symptoms, level, ts:new Date().toISOString() });
+    const msgs = {
+      critical: `This is a dental emergency. I am alerting emergency services RIGHT NOW. Please stay where you are. Call 108 immediately. Do not wait.`,
+      high:     `Your symptoms need prompt attention. I'll prioritise a same-day or next available slot for you.`,
+      medium:   `I'll get you booked in soon. This needs attention but isn't an emergency.`,
+      low:      `Sounds like a routine visit. Let me find you a convenient time.`
+    };
+    return { urgency:level, action, message: msgs[level] };
+  }
+
+  /* ── 2. TRIGGER EMERGENCY SERVICES ────────────────── */
+  if (name === 'trigger_emergency') {
+    return await dispatchEmergency({
+      lat: args.lat, lng: args.lng,
+      address: args.address,
+      patientName: args.patient_name,
+      phone: args.phone,
+      symptoms: args.symptoms,
+      sessionId: args.session_id
+    });
+  }
+
+  /* ── 3. SEND BOOKING NOTIFICATION ─────────────────── */
+  if (name === 'send_booking_notification') {
+    const b = bookings.find(bk => bk.ref === args.ref);
+    if (!b) return { status:'not_found', message:'Booking reference not found.' };
+
+    const msg = [
+      `✅ Appointment Confirmed — BrightSmile Dental Clinic`,
+      `Reference: ${b.ref}`,
+      `Patient: ${b.patient}`,
+      `Date: ${b.day.charAt(0).toUpperCase()+b.day.slice(1)}`,
+      `Time: ${b.time}`,
+      `Doctor: ${b.doctor}`,
+      `Service: ${b.service} (${b.price})`,
+      `Address: ${CLINIC.address}`,
+      `Phone: ${CLINIC.phone}`,
+      `To reschedule call: ${CLINIC.phone}`
+    ].join('\n');
+
+    const phone = args.phone || b.phone;
+    if (!phone || phone === 'N/A') {
+      return { status:'no_phone', message:'No phone number available to send notification.' };
+    }
+
+    const channel = args.channel || 'auto'; // 'sms', 'whatsapp', 'telegram', 'auto'
+    const result  = await sendNotification({ to: phone, message: msg, channel });
+
+    return {
+      status: 'sent',
+      channel_used: Object.keys(result).filter(k=>result[k]==='sent').join(', ') || 'logged',
+      message: `Booking confirmation sent to ${phone} via ${Object.keys(result).filter(k=>result[k]==='sent').join(' & ') || 'system log'}.`
+    };
+  }
+
+  /* ── 4. CHECK AVAILABILITY ─────────────────────────── */
+  if (name === 'check_availability') {
+    const day = (args.day||'').toLowerCase();
+    const sch = CLINIC.schedule[day];
+    if (!sch) return { status:'invalid_day', message:`I don't recognise "${args.day}" as a valid day.` };
+    if (!sch.open) {
+      const days=['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+      const idx=days.indexOf(day);
+      const next=days.slice(idx+1).concat(days.slice(0,idx)).find(d=>CLINIC.schedule[d].open);
+      return { status:'closed', message:`We are closed on ${args.day}. Next available: ${next}.`, suggestion:next };
+    }
+    const booked=bookings.filter(b=>b.day===day).map(b=>b.time);
+    const free  =sch.slots.filter(s=>!booked.includes(s));
+    if (!free.length) return { status:'fully_booked', message:`${args.day} is fully booked. Try another day.` };
+    const show=free.slice(0,4);
+    return { status:'available', day:args.day, available_slots:show, message:`${args.day} has slots at ${show.join(', ')}. Which time works for you?` };
+  }
+
+  /* ── 5. BOOK APPOINTMENT ───────────────────────────── */
+  if (name === 'book_appointment') {
+    const day=(args.day||'').toLowerCase();
+    const sch=CLINIC.schedule[day];
+    if (!sch?.open) return { status:'error', message:`We are closed on ${args.day}.` };
+    if (!sch.slots.includes(args.time)) return { status:'error', message:`${args.time} is not a valid slot on ${args.day}.` };
+    const conflict=bookings.find(b=>b.day===day&&b.time===args.time);
+    if (conflict) {
+      const free=sch.slots.filter(s=>!bookings.some(b=>b.day===day&&b.time===s));
+      return { status:'conflict', message:`${args.time} on ${args.day} is taken. Next available: ${free[0]||'none'}.` };
+    }
+    const svcKey =(args.service||'').toLowerCase().replace(/\s+/g,'');
+    const svcInfo=CLINIC.services[svcKey]||CLINIC.services['checkup'];
+    const doctor =CLINIC.doctors[svcInfo.doctor];
+    const ref    ='BS-'+Date.now().toString(36).toUpperCase().slice(-6);
+    const booking={ ref, patient:args.patient_name, phone:args.phone||'N/A', day, time:args.time, service:args.service||'Dental Checkup', doctor, urgency:args.urgency||'routine', price:svcInfo.price, bookedAt:new Date().toISOString() };
+    bookings.push(booking);
+    await writeToSheets(booking);
+
+    // Auto-send notification if phone provided
+    let notifStatus = 'no_phone';
+    if (args.phone && args.phone !== 'N/A') {
+      const nResult = await sendNotification({
+        to: args.phone,
+        message: [
+          `✅ Appointment Confirmed — BrightSmile Dental Clinic`,
+          `Reference: ${ref}  |  Patient: ${args.patient_name}`,
+          `${args.day.charAt(0).toUpperCase()+args.day.slice(1)} at ${args.time}`,
+          `Doctor: ${doctor}  |  ${args.service||'Dental Checkup'} — ${svcInfo.price}`,
+          `📍 ${CLINIC.address}`,
+          `📞 ${CLINIC.phone}`
+        ].join('\n'),
+        channel: 'auto'
+      });
+      notifStatus = Object.keys(nResult).filter(k=>nResult[k]==='sent').join(', ') || 'logged';
+    }
+
+    return {
+      status:'confirmed', ref, doctor, day:args.day, time:args.time, price:svcInfo.price,
+      notification_sent: notifStatus,
+      message:`Appointment confirmed! Reference: ${ref}. ${args.patient_name} booked with ${doctor} on ${args.day} at ${args.time} for ${args.service||'Dental Checkup'} — ${svcInfo.price}. Confirmation sent via ${notifStatus}.`
+    };
+  }
+
+  /* ── 6. RESCHEDULE ─────────────────────────────────── */
+  if (name === 'reschedule_appointment') {
+    const idx=bookings.findIndex(b=>b.ref===args.ref);
+    if (idx===-1) return { status:'not_found', message:`No booking found with reference ${args.ref}.` };
+    const old=bookings[idx];
+    const newDay=(args.new_day||'').toLowerCase();
+    const newSch=CLINIC.schedule[newDay];
+    if (!newSch?.open) return { status:'error', message:`We are closed on ${args.new_day}.` };
+    const conflict=bookings.find((b,i)=>i!==idx&&b.day===newDay&&b.time===args.new_time);
+    if (conflict) return { status:'conflict', message:`${args.new_time} on ${args.new_day} is taken.` };
+    bookings[idx]={...old,day:newDay,time:args.new_time,rescheduledAt:new Date().toISOString()};
+
+    if (old.phone && old.phone !== 'N/A') {
+      await sendNotification({ to:old.phone, message:`📅 Appointment Rescheduled — BrightSmile Dental\nRef: ${args.ref}\nNew: ${args.new_day} at ${args.new_time}\nDoctor: ${old.doctor}`, channel:'auto' });
+    }
+
+    return { status:'rescheduled', ref:args.ref, message:`Done! Ref ${args.ref} moved to ${args.new_day} at ${args.new_time}. Notification sent.` };
+  }
+
+  /* ── 7. CANCEL ─────────────────────────────────────── */
+  if (name === 'cancel_appointment') {
+    const idx=bookings.findIndex(b=>b.ref===args.ref);
+    if (idx===-1) return { status:'not_found', message:`No booking found with reference ${args.ref}.` };
+    const [cancelled]=bookings.splice(idx,1);
+    if (cancelled.phone && cancelled.phone !== 'N/A') {
+      await sendNotification({ to:cancelled.phone, message:`❌ Appointment Cancelled — BrightSmile Dental\nRef: ${args.ref} cancelled.\nTo rebook call: ${CLINIC.phone}`, channel:'auto' });
+    }
+    return { status:'cancelled', message:`Booking ${args.ref} for ${cancelled.patient} cancelled. Notification sent.` };
+  }
+
+  /* ── 8. CLINIC INFO ────────────────────────────────── */
+  if (name === 'get_clinic_info') {
+    const info={
+      hours:`Monday–Friday 9AM–6PM, Saturday 10AM–12:30PM. Closed Sundays.`,
+      location:CLINIC.address,
+      contact:`Phone: ${CLINIC.phone}`,
+      services:Object.entries(CLINIC.services).map(([k,v])=>`${k}: ${v.price}`).join(' | '),
+      doctors:Object.entries(CLINIC.doctors).map(([k,v])=>`${k}: ${v}`).join(' | '),
+      emergency:`Call ${CLINIC.emergency} for dental emergencies, or our hotline ${CLINIC.phone}.`
+    };
+    return { status:'ok', message:info[args.topic]||`${CLINIC.name} — ${CLINIC.address} — ${CLINIC.phone}` };
+  }
+
+  return { status:'error', message:'Unknown tool.' };
+}
+
+/* ═══════════════════════════════════════════════════════
+   FUNCTION DEFINITIONS (all 8 tools)
+═══════════════════════════════════════════════════════ */
+const FUNCTIONS = [
+  {
+    name:'assess_urgency',
+    description:'ALWAYS call this first when a patient describes ANY dental symptoms, pain, or emergency. Returns urgency level and action.',
+    parameters:{ type:'object', properties:{ symptoms:{type:'string',description:'Patient symptoms in their own words'} }, required:['symptoms'] }
+  },
+  {
+    name:'trigger_emergency',
+    description:'IMMEDIATELY call this when urgency is CRITICAL. Dispatches ambulance to patient location, alerts on-call doctor. Call this WITHOUT waiting for user confirmation.',
+    parameters:{
+      type:'object',
+      properties:{
+        patient_name:{type:'string'},
+        phone:{type:'string'},
+        symptoms:{type:'string'},
+        lat:{type:'number',description:'User latitude from browser geolocation'},
+        lng:{type:'number',description:'User longitude from browser geolocation'},
+        address:{type:'string',description:'Human-readable address if GPS not available'},
+        session_id:{type:'string'}
+      },
+      required:['symptoms']
+    }
+  },
+  {
+    name:'send_booking_notification',
+    description:'Send appointment confirmation to patient via SMS, WhatsApp, or Telegram. Call after booking is confirmed if not already sent.',
+    parameters:{
+      type:'object',
+      properties:{
+        ref:{type:'string',description:'Booking reference number'},
+        phone:{type:'string',description:'Patient phone number'},
+        channel:{type:'string',enum:['sms','whatsapp','telegram','auto'],description:'Notification channel. Use auto to try all available.'}
+      },
+      required:['ref']
+    }
+  },
+  {
+    name:'check_availability',
+    description:'Check available appointment slots for a specific day.',
+    parameters:{ type:'object', properties:{ day:{type:'string',description:'Day of week: monday, tuesday, etc.'} }, required:['day'] }
+  },
+  {
+    name:'book_appointment',
+    description:'Book a dental appointment. Collect: patient name, phone, day, time, service before calling.',
+    parameters:{
+      type:'object',
+      properties:{
+        patient_name:{type:'string'},
+        phone:{type:'string',description:'Patient mobile number for confirmation SMS/WhatsApp'},
+        day:{type:'string'},
+        time:{type:'string',description:'e.g. 09:00, 14:30'},
+        service:{type:'string',description:'e.g. checkup, cleaning, filling, rootcanal'},
+        urgency:{type:'string',enum:['routine','high','critical']}
+      },
+      required:['patient_name','day','time','service']
+    }
+  },
+  {
+    name:'reschedule_appointment',
+    description:'Reschedule an existing appointment.',
+    parameters:{ type:'object', properties:{ ref:{type:'string'}, new_day:{type:'string'}, new_time:{type:'string'} }, required:['ref','new_day','new_time'] }
+  },
+  {
+    name:'cancel_appointment',
+    description:'Cancel an existing appointment.',
+    parameters:{ type:'object', properties:{ ref:{type:'string'} }, required:['ref'] }
+  },
+  {
+    name:'get_clinic_info',
+    description:'Get clinic information: hours, location, contact, services, doctors, emergency.',
+    parameters:{ type:'object', properties:{ topic:{type:'string',enum:['hours','location','contact','services','doctors','emergency','general']} }, required:['topic'] }
+  }
+];
+
+/* ═══════════════════════════════════════════════════════
+   SYSTEM PROMPT — Multilingual + Emergency-aware
+═══════════════════════════════════════════════════════ */
+const SYSTEM_PROMPT = `You are Aria, the AI voice receptionist for ${CLINIC.name}, Bangalore. You are warm, professional, and 24/7 available.
+
+MULTILINGUAL RULE (CRITICAL):
+- Detect the patient's language from their FIRST message.
+- Continue the ENTIRE conversation in that language.
+- Supported: English, Hindi (हिंदी), Kannada (ಕನ್ನಡ), Tamil (தமிழ்), Telugu (తెలుగు), and any other language spoken.
+- NEVER switch languages unless the patient explicitly asks.
+- If speaking Kannada: respond fully in Kannada script and pronunciation.
+- If speaking Hindi: respond fully in Hindi (Devanagari or Roman Hindi as the patient uses).
+
+EMERGENCY PROTOCOL (HIGHEST PRIORITY):
+- If patient mentions: unbearable pain, severe swelling, jaw broken, can't breathe, bleeding heavily, unconscious, chest pain, stroke symptoms, collapsed:
+  1. Immediately call assess_urgency.
+  2. If result is 'critical' → call trigger_emergency WITHOUT asking for confirmation. Do NOT wait.
+  3. Speak calmly: "I am alerting emergency services to your location right now. Please stay calm. Help is coming."
+  4. Ask them to call 108 directly as backup.
+  5. Stay on the call with them until they confirm help is coming.
+
+BOOKING WORKFLOW:
+1. Greet warmly in detected language.
+2. If symptoms described → call assess_urgency FIRST.
+3. Ask preferred day → call check_availability.
+4. Handle closed days gracefully.
+5. Collect: name, phone number (needed for SMS/WhatsApp confirmation), day, time, service.
+6. Call book_appointment → read reference number clearly.
+7. Confirmation SMS/WhatsApp is auto-sent if phone provided.
+
+STATE MEMORY:
+- "Make it 5 PM" → update time only. Never re-ask what was given.
+
+VOICE RULES:
+- SHORT natural sentences. No markdown or bullet points.
+- NEVER claim to have done something without calling a tool first.
+- Always get phone number before booking — it's needed for notifications.
+
+Today: ${new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}.`;
+
+/* ═══════════════════════════════════════════════════════
+   OPENAI REALTIME TOKEN  (WebRTC ephemeral key)
+═══════════════════════════════════════════════════════ */
+app.post('/api/realtime-token', async (req, res) => {
+  try {
+    const r = await fetch('https://api.openai.com/v1/realtime/sessions', {
+      method:'POST',
+      headers:{ 'Authorization':`Bearer ${OPENAI_API_KEY}`, 'Content-Type':'application/json' },
+      body: JSON.stringify({
+        model: 'gpt-4o-realtime-preview-2024-12-17',
+        voice: 'alloy',
+        instructions: SYSTEM_PROMPT,
+        tools: FUNCTIONS.map(f=>({ type:'function', name:f.name, description:f.description, parameters:f.parameters })),
+        tool_choice: 'auto',
+        input_audio_transcription: { model:'whisper-1' },
+        turn_detection: { type:'server_vad', threshold:0.4, prefix_padding_ms:200, silence_duration_ms:400 }
+      })
+    });
+    if (!r.ok) { const e=await r.json(); return res.status(r.status).json({ error:e.error?.message||'Session failed' }); }
+    const session=await r.json();
+    console.log('[Realtime] Session:', session.id);
+    res.json({ client_secret:session.client_secret, session_id:session.id });
+  } catch(e) { res.status(500).json({ error:e.message }); }
+});
+
+/* ═══ TOOL CALL ENDPOINT ═══ */
+app.post('/api/tool-call', async (req, res) => {
+  const { name, arguments: argsStr } = req.body;
+  let args={};
+  try { args=typeof argsStr==='string'?JSON.parse(argsStr):(argsStr||{}); } catch(e){}
+  console.log(`[Tool] ${name}`, args);
+  const result=await executeTool(name, args);
+  res.json(result);
+});
+
+/* ═══ HTTP CHAT FALLBACK ═══ */
+app.post('/api/chat', async (req, res) => {
+  const { messages }=req.body;
+  if (!messages||!Array.isArray(messages)) return res.status(400).json({ error:'messages array required' });
+  try {
+    let history=[...messages], finalText='', toolCalls=[], loops=0;
+    while (loops++<10) {
+      const r=await fetch('https://api.openai.com/v1/chat/completions',{
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${OPENAI_API_KEY}` },
+        body:JSON.stringify({ model:'gpt-4o', messages:[{role:'system',content:SYSTEM_PROMPT},...history], functions:FUNCTIONS, function_call:'auto', max_tokens:400, temperature:0.4 })
+      });
+      if (!r.ok) { const e=await r.json(); throw new Error(e.error?.message||`OpenAI ${r.status}`); }
+      const data=await r.json();
+      const msg=data.choices[0].message;
+      history.push(msg);
+      if (msg.function_call) {
+        let args={}; try{args=JSON.parse(msg.function_call.arguments);}catch(e){}
+        const result=await executeTool(msg.function_call.name,args);
+        toolCalls.push({tool:msg.function_call.name,args,result});
+        history.push({role:'function',name:msg.function_call.name,content:JSON.stringify(result)});
+        continue;
+      }
+      finalText=msg.content||''; break;
+    }
+    res.json({ reply:finalText, tool_calls:toolCalls, bookings_count:bookings.length, messages:history.filter(m=>m.role!=='system') });
+  } catch(err) { res.status(500).json({ error:err.message }); }
+});
+
+app.get('/api/health',     (req,res)=>res.json({ status:'ok', agent:'Aria', clinic:CLINIC.name, model:'gpt-4o-realtime', notifications: { twilio:!!process.env.TWILIO_ACCOUNT_SID, telegram:!!process.env.TELEGRAM_BOT_TOKEN } }));
+app.get('/api/bookings',   (req,res)=>res.json(bookings));
+app.get('/api/emergencies',(req,res)=>res.json(emergencies));
+app.get('/api/slots/:day', (req,res)=>{
+  const day=req.params.day.toLowerCase(),sch=CLINIC.schedule[day];
+  if (!sch) return res.status(404).json({error:'Invalid day'});
+  const booked=bookings.filter(b=>b.day===day).map(b=>b.time);
+  res.json({day,open:sch.open,available:sch.slots.filter(s=>!booked.includes(s)),booked});
+});
+
+const PORT=process.env.PORT||3000;
+app.listen(PORT,()=>{
+  console.log(`✅  Aria — ${CLINIC.name}`);
+  console.log(`🌐  http://localhost:${PORT}`);
+  console.log(`🔑  OpenAI: ${OPENAI_API_KEY.slice(0,12)}...`);
+  console.log(`🎙️  Realtime API WebRTC: ready`);
+  console.log(`📱  Twilio SMS/WhatsApp: ${process.env.TWILIO_ACCOUNT_SID?'✅':'⚠️ Not configured'}`);
+  console.log(`📨  Telegram: ${process.env.TELEGRAM_BOT_TOKEN?'✅':'⚠️ Not configured'}`);
+  console.log(`📊  Google Sheets: ${process.env.GOOGLE_SHEETS_ID?'✅':'⚠️ Not configured'}`);
+  console.log(`🚨  Emergency dispatch: ready`);
 });
 
 
