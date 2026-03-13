@@ -815,7 +815,7 @@ app.listen(PORT, () => {
 
 
 
-require('dotenv').config();
+/*require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -896,7 +896,7 @@ function executeTool(name, args) {
   if (name === 'calculate') {
     try {
       // Safe eval for basic math
-      const result = Function('"use strict"; return (' + args.expression.replace(/[^0-9+\-*/().% ]/g, '') + ')')();
+      const result = Function('"use strict"; return (' + args.expression.replace(/[^0-9+\-().% ]/g, '') + ')')();
       return `The result of ${args.expression} is ${result}`;
     } catch(e) {
       return `Could not calculate: ${args.expression}`;
@@ -1065,6 +1065,505 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅  ShadowQuant running at http://localhost:${PORT}`);
   console.log(`🔑  API key: ${OPENAI_API_KEY.slice(0,8)}...`);
+});*/
+
+
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+
+const app = express();
+app.use(express.json());
+app.use(cors());
+
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const GOOGLE_SHEETS_ID = process.env.GOOGLE_SHEETS_ID;       // your sheet ID
+const GOOGLE_SERVICE_ACCOUNT = process.env.GOOGLE_SERVICE_ACCOUNT; // JSON string of service account
+
+if (!OPENAI_API_KEY) { console.error('❌ Missing OPENAI_API_KEY'); process.exit(1); }
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+// ═══════════════════════════════════════════════════════
+// CLINIC BUSINESS LOGIC
+// ═══════════════════════════════════════════════════════
+const CLINIC = {
+  name: "ShadowQuant MediCare Clinic",
+  schedule: {
+    monday:    { open: true,  slots: ["09:00","09:30","10:00","10:30","11:00","11:30","14:00","14:30","15:00","15:30","16:00","16:30"] },
+    tuesday:   { open: true,  slots: ["09:00","09:30","10:00","10:30","11:00","11:30","14:00","14:30","15:00","15:30","16:00","16:30"] },
+    wednesday: { open: true,  slots: ["09:00","09:30","10:00","10:30","11:00","11:30","14:00","14:30","15:00","15:30","16:00","16:30"] },
+    thursday:  { open: true,  slots: ["09:00","09:30","10:00","10:30","11:00","11:30","14:00","14:30","15:00","15:30","16:00","16:30"] },
+    friday:    { open: true,  slots: ["09:00","09:30","10:00","10:30","11:00","11:30","14:00","14:30","15:00"] },
+    saturday:  { open: true,  slots: ["10:00","10:30","11:00","11:30","12:00"] },
+    sunday:    { open: false, slots: [] }
+  },
+  doctors: {
+    general:    "Dr. Priya Sharma",
+    dental:     "Dr. Rajan Mehta",
+    cardiology: "Dr. Suresh Nair",
+    pediatric:  "Dr. Kavitha Rao",
+    orthopedic: "Dr. Arun Iyer",
+    emergency:  "Dr. On-Call"
+  },
+  emergencyNumber: "108",
+  address: "12 Health Street, MG Road, Bangalore - 560001",
+  phone: "+91-80-4567-8900"
+};
+
+// In-memory bookings (shown live, also written to Google Sheets)
+const bookings = [];
+const incidents = []; // escalations
+
+// ═══════════════════════════════════════════════════════
+// GOOGLE SHEETS INTEGRATION
+// ═══════════════════════════════════════════════════════
+async function writeToGoogleSheets(rowData) {
+  if (!GOOGLE_SHEETS_ID || !GOOGLE_SERVICE_ACCOUNT) {
+    console.log('[Sheets] Skipping — credentials not configured');
+    return { success: false, reason: 'not_configured' };
+  }
+
+  try {
+    const { google } = require('googleapis');
+    const credentials = JSON.parse(GOOGLE_SERVICE_ACCOUNT);
+    const auth = new google.auth.GoogleAuth({
+      credentials,
+      scopes: ['https://www.googleapis.com/auth/spreadsheets']
+    });
+    const sheets = google.sheets({ version: 'v4', auth });
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: GOOGLE_SHEETS_ID,
+      range: 'Sheet1!A:H',
+      valueInputOption: 'USER_ENTERED',
+      requestBody: {
+        values: [[
+          rowData.ref,
+          rowData.patient_name,
+          rowData.phone,
+          rowData.day,
+          rowData.time,
+          rowData.doctor,
+          rowData.reason,
+          new Date().toLocaleString('en-IN')
+        ]]
+      }
+    });
+    console.log('[Sheets] ✅ Written:', rowData.ref);
+    return { success: true };
+  } catch (err) {
+    console.error('[Sheets] Error:', err.message);
+    return { success: false, reason: err.message };
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// TOOL EXECUTION — THE AGENTIC CORE
+// ═══════════════════════════════════════════════════════
+async function executeTool(name, args) {
+
+  // ── 1. CHECK AVAILABILITY ──────────────────────────
+  if (name === 'check_availability') {
+    const day = (args.day || '').toLowerCase();
+    const schedule = CLINIC.schedule[day];
+
+    if (!schedule) {
+      return { status: 'error', message: `I don't recognise "${args.day}" as a valid day. Please say a day of the week like Monday or Tuesday.` };
+    }
+
+    if (!schedule.open) {
+      // Smart suggestion — find next open day
+      const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+      const idx = days.indexOf(day);
+      let nextDay = null;
+      for (let i = 1; i <= 7; i++) {
+        const candidate = days[(idx + i) % 7];
+        if (CLINIC.schedule[candidate].open) { nextDay = candidate; break; }
+      }
+      return {
+        status: 'closed',
+        message: `We are closed on ${args.day}. The next available day is ${nextDay}. Would you like to book on ${nextDay} instead?`
+      };
+    }
+
+    // Filter out already-booked slots
+    const bookedSlots = bookings
+      .filter(b => b.day.toLowerCase() === day)
+      .map(b => b.time);
+    const available = schedule.slots.filter(s => !bookedSlots.includes(s));
+
+    if (available.length === 0) {
+      return { status: 'full', message: `${args.day} is fully booked. Shall I check another day?` };
+    }
+
+    // Return first 4 available slots
+    const shown = available.slice(0, 4);
+    return {
+      status: 'available',
+      day: args.day,
+      slots: shown,
+      message: `${args.day} has slots available at ${shown.join(', ')}. Which time works best for you?`
+    };
+  }
+
+  // ── 2. BOOK APPOINTMENT ───────────────────────────
+  if (name === 'book_appointment') {
+    const day = (args.day || '').toLowerCase();
+    const time = args.time;
+    const schedule = CLINIC.schedule[day];
+
+    // Validate day
+    if (!schedule || !schedule.open) {
+      return { status: 'error', message: `We are closed on ${args.day}. Please choose another day.` };
+    }
+
+    // Validate time slot exists
+    if (!schedule.slots.includes(time)) {
+      return { status: 'error', message: `${time} is not a valid slot on ${args.day}. Available slots are ${schedule.slots.slice(0,4).join(', ')}.` };
+    }
+
+    // Check double booking
+    const conflict = bookings.find(b => b.day.toLowerCase() === day && b.time === time);
+    if (conflict) {
+      const available = schedule.slots.filter(s => !bookings.some(b => b.day.toLowerCase()===day && b.time===s));
+      const next = available[0];
+      return {
+        status: 'conflict',
+        message: `Sorry, ${time} on ${args.day} is already taken. The next available slot is ${next}. Shall I book that instead?`
+      };
+    }
+
+    // Determine doctor based on reason
+    let doctor = CLINIC.doctors.general;
+    const reason = (args.reason || '').toLowerCase();
+    if (reason.includes('teeth') || reason.includes('dental') || reason.includes('tooth')) doctor = CLINIC.doctors.dental;
+    else if (reason.includes('heart') || reason.includes('chest') || reason.includes('cardio')) doctor = CLINIC.doctors.cardiology;
+    else if (reason.includes('child') || reason.includes('kid') || reason.includes('baby')) doctor = CLINIC.doctors.pediatric;
+    else if (reason.includes('bone') || reason.includes('joint') || reason.includes('ortho')) doctor = CLINIC.doctors.orthopedic;
+
+    // Generate reference
+    const ref = 'CLN-' + Date.now().toString(36).toUpperCase().slice(-6);
+
+    const booking = {
+      ref,
+      patient_name: args.patient_name,
+      phone: args.phone || 'Not provided',
+      day: args.day,
+      time: args.time,
+      doctor,
+      reason: args.reason,
+      urgency: args.urgency || 'normal',
+      bookedAt: new Date().toISOString()
+    };
+
+    bookings.push(booking);
+
+    // Write to Google Sheets (real state change)
+    const sheetsResult = await writeToGoogleSheets(booking);
+
+    return {
+      status: 'success',
+      ref,
+      doctor,
+      day: args.day,
+      time: args.time,
+      sheets_written: sheetsResult.success,
+      message: `Appointment confirmed! Reference ${ref}. ${args.patient_name} is booked with ${doctor} on ${args.day} at ${args.time}. ${sheetsResult.success ? 'This has been saved to our records.' : ''}`
+    };
+  }
+
+  // ── 3. ASSESS URGENCY ────────────────────────────
+  if (name === 'assess_urgency') {
+    const symptoms = (args.symptoms || '').toLowerCase();
+
+    const CRITICAL = ['chest pain','heart attack','stroke','unconscious','not breathing','severe bleeding','accident','poisoning','suicidal'];
+    const HIGH = ['high fever','difficulty breathing','severe pain','fracture','vomiting blood','dizzy','fainted'];
+    const MEDIUM = ['fever','infection','pain','swelling','rash','headache','cough'];
+
+    let level = 'low';
+    let action = 'regular_booking';
+    let message = '';
+
+    if (CRITICAL.some(k => symptoms.includes(k))) {
+      level = 'critical';
+      action = 'emergency_escalate';
+      message = `This sounds like a medical emergency. Please call ${CLINIC.emergencyNumber} immediately or go to the nearest emergency room. Do not wait for an appointment.`;
+    } else if (HIGH.some(k => symptoms.includes(k))) {
+      level = 'high';
+      action = 'priority_booking';
+      message = `Your symptoms need prompt attention. I'll book you a priority same-day appointment if available.`;
+    } else if (MEDIUM.some(k => symptoms.includes(k))) {
+      level = 'medium';
+      action = 'regular_booking';
+      message = `Your symptoms sound manageable. Let me find you a convenient appointment slot.`;
+    } else {
+      level = 'low';
+      action = 'regular_booking';
+      message = `This sounds like a routine visit. Let me help you schedule an appointment.`;
+    }
+
+    // Log escalations
+    if (level === 'critical') {
+      incidents.push({ symptoms: args.symptoms, level, timestamp: new Date().toISOString() });
+    }
+
+    return { status: 'assessed', urgency: level, action, message };
+  }
+
+  // ── 4. RESCHEDULE APPOINTMENT ────────────────────
+  if (name === 'reschedule_appointment') {
+    const ref = args.ref;
+    const idx = bookings.findIndex(b => b.ref === ref);
+
+    if (idx === -1) {
+      return { status: 'error', message: `I couldn't find a booking with reference ${ref}. Please check and try again.` };
+    }
+
+    const old = bookings[idx];
+    const newDay = (args.new_day || '').toLowerCase();
+    const schedule = CLINIC.schedule[newDay];
+
+    if (!schedule || !schedule.open) {
+      return { status: 'error', message: `We are closed on ${args.new_day}. Please choose another day.` };
+    }
+
+    const conflict = bookings.find((b,i) => i!==idx && b.day.toLowerCase()===newDay && b.time===args.new_time);
+    if (conflict) {
+      return { status: 'conflict', message: `${args.new_time} on ${args.new_day} is already taken. Please choose another slot.` };
+    }
+
+    bookings[idx] = { ...old, day: args.new_day, time: args.new_time, rescheduledAt: new Date().toISOString() };
+
+    return {
+      status: 'success',
+      ref,
+      message: `Done! Your appointment ${ref} has been rescheduled from ${old.day} at ${old.time} to ${args.new_day} at ${args.new_time}. Same doctor: ${old.doctor}.`
+    };
+  }
+
+  // ── 5. CANCEL APPOINTMENT ────────────────────────
+  if (name === 'cancel_appointment') {
+    const ref = args.ref;
+    const idx = bookings.findIndex(b => b.ref === ref);
+    if (idx === -1) {
+      return { status: 'error', message: `No booking found with reference ${ref}.` };
+    }
+    const cancelled = bookings.splice(idx, 1)[0];
+    return {
+      status: 'success',
+      message: `Appointment ${ref} for ${cancelled.patient_name} on ${cancelled.day} at ${cancelled.time} has been cancelled. We hope to see you again soon.`
+    };
+  }
+
+  // ── 6. GET CLINIC INFO ───────────────────────────
+  if (name === 'get_clinic_info') {
+    const t = args.info_type;
+    if (t === 'hours') return { status: 'success', message: `We are open Monday to Friday 9 AM to 5 PM, Saturday 10 AM to 12 PM, and closed on Sundays.` };
+    if (t === 'location') return { status: 'success', message: `We are located at ${CLINIC.address}. Phone: ${CLINIC.phone}.` };
+    if (t === 'doctors') return { status: 'success', message: `Our doctors: General — ${CLINIC.doctors.general}, Dental — ${CLINIC.doctors.dental}, Cardiology — ${CLINIC.doctors.cardiology}, Pediatric — ${CLINIC.doctors.pediatric}, Orthopedic — ${CLINIC.doctors.orthopedic}.` };
+    if (t === 'emergency') return { status: 'success', message: `For medical emergencies please call ${CLINIC.emergencyNumber} immediately. Our clinic emergency line is ${CLINIC.phone}.` };
+    return { status: 'success', message: `${CLINIC.name} — ${CLINIC.address} — ${CLINIC.phone}. Open Mon-Fri 9-5, Sat 10-12, closed Sunday.` };
+  }
+
+  return { status: 'error', message: 'Unknown tool.' };
+}
+
+// ═══════════════════════════════════════════════════════
+// OPENAI FUNCTION DEFINITIONS
+// ═══════════════════════════════════════════════════════
+const FUNCTIONS = [
+  {
+    name: 'assess_urgency',
+    description: 'ALWAYS call this first when a patient describes any medical symptoms or health concern. Assesses urgency and determines next action.',
+    parameters: {
+      type: 'object',
+      properties: {
+        symptoms: { type: 'string', description: 'Symptoms described by the patient in their own words' }
+      },
+      required: ['symptoms']
+    }
+  },
+  {
+    name: 'check_availability',
+    description: 'Check available appointment slots for a specific day. Call this when the patient mentions a preferred day.',
+    parameters: {
+      type: 'object',
+      properties: {
+        day: { type: 'string', description: 'Day of week e.g. monday, tuesday, saturday' }
+      },
+      required: ['day']
+    }
+  },
+  {
+    name: 'book_appointment',
+    description: 'Book a confirmed appointment. Only call this after you have: patient name, preferred day, preferred time, and reason for visit.',
+    parameters: {
+      type: 'object',
+      properties: {
+        patient_name:  { type: 'string', description: 'Full name of the patient' },
+        phone:         { type: 'string', description: 'Patient phone number if provided' },
+        day:           { type: 'string', description: 'Day of the appointment e.g. monday' },
+        time:          { type: 'string', description: 'Time slot e.g. 09:00 or 14:30' },
+        reason:        { type: 'string', description: 'Reason for the visit or symptoms' },
+        urgency:       { type: 'string', enum: ['low','medium','high','critical'], description: 'Urgency level from assess_urgency' }
+      },
+      required: ['patient_name', 'day', 'time', 'reason']
+    }
+  },
+  {
+    name: 'reschedule_appointment',
+    description: 'Reschedule an existing appointment to a new day and time. Requires the booking reference number.',
+    parameters: {
+      type: 'object',
+      properties: {
+        ref:      { type: 'string', description: 'Booking reference e.g. CLN-ABC123' },
+        new_day:  { type: 'string', description: 'New preferred day' },
+        new_time: { type: 'string', description: 'New preferred time slot' }
+      },
+      required: ['ref', 'new_day', 'new_time']
+    }
+  },
+  {
+    name: 'cancel_appointment',
+    description: 'Cancel an existing appointment using the booking reference number.',
+    parameters: {
+      type: 'object',
+      properties: {
+        ref: { type: 'string', description: 'Booking reference number' }
+      },
+      required: ['ref']
+    }
+  },
+  {
+    name: 'get_clinic_info',
+    description: 'Get clinic information like hours, location, doctors, or emergency contacts.',
+    parameters: {
+      type: 'object',
+      properties: {
+        info_type: { type: 'string', enum: ['hours','location','doctors','emergency','general'] }
+      },
+      required: ['info_type']
+    }
+  }
+];
+
+// ═══════════════════════════════════════════════════════
+// SYSTEM PROMPT — THE BRAIN OF SHADOWQUANT
+// ═══════════════════════════════════════════════════════
+const SYSTEM_PROMPT = `You are ShadowQuant, the AI voice receptionist for ${CLINIC.name}. You are warm, professional, and efficient — like the best human receptionist but faster and always available.
+
+YOUR AGENTIC WORKFLOW:
+1. Greet the patient and ask how you can help.
+2. If they describe ANY symptom → immediately call assess_urgency first.
+3. If urgency is CRITICAL → tell them to call 108. Do NOT book — this is an emergency.
+4. If urgency is HIGH → prioritize same-day slots.
+5. If urgency is LOW/MEDIUM → find a convenient slot.
+6. Always check_availability before booking.
+7. Handle closed-day errors gracefully: "We're closed Sunday, shall I check Monday?"
+8. Collect: name, preferred day, preferred time, reason.
+9. Confirm all details before booking.
+10. After booking → always read the reference number clearly.
+
+STATE MEMORY RULES:
+- Remember everything the user says in this conversation.
+- If user says "make it 5 PM instead" → update the time, keep everything else.
+- If user says "actually Tuesday" → update the day, keep the time.
+- Never ask for information you already have.
+
+CONVERSATION RULES:
+- Speak in SHORT natural sentences — you are voice, not text.
+- NEVER use bullet points or markdown.
+- NEVER say you have done something without actually calling a tool first.
+- Be warm: "Of course!", "Absolutely!", "Let me check that for you."
+- Handle barge-in gracefully — if interrupted, immediately address the new question.
+- Always offer to help further after completing a task.
+
+Today is ${new Date().toLocaleDateString('en-IN', { weekday:'long', year:'numeric', month:'long', day:'numeric' })}.`;
+
+// ═══════════════════════════════════════════════════════
+// MAIN CHAT ENDPOINT
+// ═══════════════════════════════════════════════════════
+app.post('/api/chat', async (req, res) => {
+  const { messages } = req.body;
+  if (!messages || !Array.isArray(messages)) return res.status(400).json({ error: 'messages required' });
+
+  try {
+    let history = [...messages];
+    let finalText = '';
+    let toolCalls = [];
+    let loopCount = 0;
+
+    while (loopCount < 10) {
+      loopCount++;
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_API_KEY}` },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...history],
+          functions: FUNCTIONS,
+          function_call: 'auto',
+          max_tokens: 400,
+          temperature: 0.5   // lower = more consistent/predictable for a receptionist
+        })
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error?.message || `OpenAI error ${response.status}`);
+      }
+
+      const data = await response.json();
+      const msg = data.choices[0].message;
+      history.push(msg);
+
+      if (msg.function_call) {
+        let args = {};
+        try { args = JSON.parse(msg.function_call.arguments); } catch(e) {}
+
+        console.log(`[Tool] ${msg.function_call.name}(${JSON.stringify(args)})`);
+        const result = await executeTool(msg.function_call.name, args);
+        console.log(`[Result]`, result);
+
+        toolCalls.push({ tool: msg.function_call.name, args, result });
+        history.push({ role: 'function', name: msg.function_call.name, content: JSON.stringify(result) });
+        continue;
+      }
+
+      finalText = msg.content || '';
+      break;
+    }
+
+    res.json({
+      reply: finalText,
+      tool_calls: toolCalls,
+      bookings_count: bookings.length,
+      messages: history.filter(m => m.role !== 'system')
+    });
+
+  } catch (err) {
+    console.error('[ERROR]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Admin Endpoints ────────────────────────────
+app.get('/api/health',       (req, res) => res.json({ status: 'ok', agent: 'ShadowQuant', model: 'gpt-4o', version: '2.0' }));
+app.get('/api/bookings',     (req, res) => res.json(bookings));
+app.get('/api/slots/:day',   (req, res) => {
+  const day = req.params.day.toLowerCase();
+  const schedule = CLINIC.schedule[day];
+  if (!schedule) return res.status(404).json({ error: 'Invalid day' });
+  const booked = bookings.filter(b => b.day.toLowerCase()===day).map(b=>b.time);
+  const available = schedule.slots.filter(s => !booked.includes(s));
+  res.json({ day, open: schedule.open, available, booked });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`✅  ShadowQuant Clinic Agent v2.0 — http://localhost:${PORT}`);
+  console.log(`📋  Google Sheets: ${GOOGLE_SHEETS_ID ? '✅ Connected' : '⚠️  Not configured (set GOOGLE_SHEETS_ID)'}`);
 });
 
 
