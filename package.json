@@ -1,13 +1,23 @@
 {
-  "name": "shadowquant-clinic-agent",
+  "name": "shadowquant-dental-agent",
   "version": "2.0.0",
-  "description": "ShadowQuant — Smart Clinic Voice AI Agent",
+  "description": "ShadowQuant — Autonomous Dental Voice Agent with OpenAI Realtime WebRTC",
   "main": "server.js",
-  "scripts": { "start": "node server.js" },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "express": "^4.18.2",
-    "googleapis": "^140.0.0"
+    "express": "^4.18.3",
+    "googleapis": "^144.0.0",
+    "twilio": "^5.3.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
