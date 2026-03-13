@@ -2122,7 +2122,7 @@ checkServer();
 </html>-->
 
 
-<!DOCTYPE html>
+<!--<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -2321,7 +2321,7 @@ body::after{content:'';position:fixed;inset:0;
 <body>
 <div class="app">
 
-  <!-- TOPBAR -->
+  
   <div class="topbar">
     <div class="logo">
       <div class="logo-icon">⚡</div>
@@ -2339,17 +2339,15 @@ body::after{content:'';position:fixed;inset:0;
       </div>
     </div>
   </div>
-
-  <!-- MAIN GRID -->
   <div class="main">
 
-    <!-- LEFT -->
+    
     <div class="left">
 
-      <!-- CALL CARD -->
+      
       <div class="call-card">
 
-        <!-- Urgency banner (shown on high/critical) -->
+        
         <div class="urgency-banner" id="urgencyBanner">
           <span id="urgencyIcon">⚠️</span>
           <span id="urgencyText"></span>
@@ -2374,7 +2372,7 @@ body::after{content:'';position:fixed;inset:0;
         <div class="state-label IDLE" id="stateLabel">CLICK TO START CALL</div>
         <div class="barge-hint" id="bargeHint">🎙️ Speak anytime to interrupt — Barge-in enabled</div>
 
-        <!-- Tool activity flash -->
+        
         <div class="tool-flash" id="toolFlash">
           <span class="tool-icon" id="toolFlashIcon">⚙️</span>
           <span id="toolFlashText">Checking availability…</span>
@@ -2382,7 +2380,7 @@ body::after{content:'';position:fixed;inset:0;
 
       </div>
 
-      <!-- TRANSCRIPT -->
+      
       <div class="transcript-card">
         <div class="tc-header">
           <div class="tc-title">📋 Conversation</div>
@@ -2402,10 +2400,10 @@ body::after{content:'';position:fixed;inset:0;
 
     </div>
 
-    <!-- RIGHT -->
+    
     <div class="right">
 
-      <!-- Server status -->
+      
       <div class="panel-card">
         <div class="pc-title">⚙️ System</div>
         <div class="pc-body" style="display:flex;flex-direction:column;gap:9px">
@@ -2421,7 +2419,7 @@ body::after{content:'';position:fixed;inset:0;
         </div>
       </div>
 
-      <!-- Live bookings feed -->
+      
       <div class="panel-card">
         <div class="pc-title">📅 Live Bookings <span id="booking-count" style="margin-left:auto;background:rgba(109,40,217,0.2);border-radius:4px;padding:1px 6px;color:#a78bfa">0</span></div>
         <div class="pc-body">
@@ -2431,7 +2429,7 @@ body::after{content:'';position:fixed;inset:0;
         </div>
       </div>
 
-      <!-- Tool log -->
+      
       <div class="panel-card">
         <div class="pc-title">🔧 Tool Activity Log</div>
         <div class="pc-body">
@@ -2441,7 +2439,7 @@ body::after{content:'';position:fixed;inset:0;
         </div>
       </div>
 
-      <!-- Quick scenarios -->
+    
       <div class="panel-card">
         <div class="pc-title">💡 Try These Scenarios</div>
         <div class="pc-body">
@@ -2459,7 +2457,7 @@ body::after{content:'';position:fixed;inset:0;
     </div>
   </div>
 
-  <!-- STATUSBAR -->
+  
   <div class="statusbar">
     <div class="sb-i"><div class="sb-dot" id="dot-server"></div>Server</div>
     <div class="sb-i"><div class="sb-dot" id="dot-stt"></div>Mic</div>
@@ -2818,6 +2816,1074 @@ function clearChat(){
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br/>')}
 
 checkServer();
+</script>
+</body>
+</html>-->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ShadowQuant Smart Clinic — AI Receptionist</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --white:#ffffff;
+  --bg:#f5f7fa;
+  --bg2:#eef1f6;
+  --surface:#ffffff;
+  --border:#e2e8f0;
+  --border2:#cbd5e1;
+  --text:#0f172a;
+  --text2:#475569;
+  --text3:#94a3b8;
+  --text4:#cbd5e1;
+  --blue:#1d6fe8;
+  --blue2:#2d7ff9;
+  --blue-lt:#eff6ff;
+  --blue-md:#bfdbfe;
+  --teal:#0891b2;
+  --teal-lt:#ecfeff;
+  --green:#059669;
+  --green-lt:#ecfdf5;
+  --green-md:#a7f3d0;
+  --red:#dc2626;
+  --red-lt:#fef2f2;
+  --red-md:#fecaca;
+  --orange:#d97706;
+  --orange-lt:#fffbeb;
+  --orange-md:#fde68a;
+  --purple:#7c3aed;
+  --purple-lt:#f5f3ff;
+  --radius:12px;
+  --radius-sm:8px;
+  --shadow:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:0 4px 16px rgba(0,0,0,0.08),0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg:0 8px 32px rgba(0,0,0,0.1),0 4px 8px rgba(0,0,0,0.04);
+  --font-sans:'Sora',system-ui,sans-serif;
+  --font-serif:'Lora',Georgia,serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font-sans);min-height:100vh;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;font-feature-settings:"kern" 1,"liga" 1}
+
+/* ── TOPBAR ── */
+.topbar{
+  background:var(--white);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:100;
+  box-shadow:var(--shadow);
+}
+.topbar-inner{
+  max-width:1320px;margin:0 auto;padding:0 24px;
+  display:flex;align-items:center;height:64px;gap:16px;
+}
+.logo-mark{
+  width:40px;height:40px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--blue) 0%,var(--teal) 100%);
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+  box-shadow:0 2px 8px rgba(29,111,232,0.3);
+}
+.logo-text{font-size:1.1rem;font-weight:700;color:var(--text);line-height:1.2;font-family:var(--font-serif);letter-spacing:-0.01em}
+.logo-sub{font-size:0.58rem;color:var(--text3);font-family:var(--font-mono);letter-spacing:0.12em;text-transform:uppercase;font-weight:300}
+.topbar-pills{display:flex;align-items:center;gap:8px;margin-left:auto}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:0.68rem;font-weight:500;font-family:var(--font-mono)}
+.pill-green{background:var(--green-lt);border:1px solid var(--green-md);color:var(--green)}
+.pill-blue{background:var(--blue-lt);border:1px solid var(--blue-md);color:var(--blue)}
+.pill-dot{width:5px;height:5px;border-radius:50%;background:currentColor;animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.7)}}
+
+/* ── LAYOUT ── */
+.page{max-width:1320px;margin:0 auto;padding:24px;display:grid;grid-template-columns:360px 1fr;grid-template-rows:auto 1fr;gap:20px}
+.page-left{display:flex;flex-direction:column;gap:16px}
+.page-right{display:flex;flex-direction:column;gap:16px}
+
+/* ── CARD ── */
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.card-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:0.78rem;font-weight:600;color:var(--text);display:flex;align-items:center;gap:7px;letter-spacing:0.02em;text-transform:uppercase}
+.card-badge{font-size:0.62rem;font-family:var(--font-mono);padding:3px 9px;border-radius:20px;font-weight:500}
+.badge-green{background:var(--green-lt);border:1px solid var(--green-md);color:var(--green)}
+.badge-blue{background:var(--blue-lt);border:1px solid var(--blue-md);color:var(--blue)}
+.badge-orange{background:var(--orange-lt);border:1px solid var(--orange-md);color:var(--orange)}
+.badge-red{background:var(--red-lt);border:1px solid var(--red-md);color:var(--red)}
+
+/* ── ORB PANEL ── */
+.orb-card{background:linear-gradient(160deg,var(--blue-lt) 0%,var(--white) 60%);border:1px solid var(--blue-md);border-radius:var(--radius);box-shadow:var(--shadow-md);overflow:hidden}
+.orb-inner{padding:28px 24px;display:flex;flex-direction:column;align-items:center;gap:16px}
+
+/* Technology badge */
+.tech-badge{display:flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(29,111,232,0.06);border:1px solid rgba(29,111,232,0.2);border-radius:8px;width:100%}
+.tech-dot{width:7px;height:7px;border-radius:50%;background:var(--blue);animation:pulse 2s ease infinite;flex-shrink:0}
+.tech-label{font-size:0.68rem;font-family:var(--font-mono);color:var(--blue);font-weight:500}
+.tech-sub{font-size:0.56rem;color:var(--text3);font-family:var(--font-mono);margin-top:1px}
+
+/* Ring system */
+.ring-sys{position:relative;width:160px;height:160px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ring{position:absolute;border-radius:50%;border:1.5px solid;animation:ringFloat 4s ease-in-out infinite}
+.ring-1{inset:0;border-color:rgba(29,111,232,0.2);animation-delay:0s}
+.ring-2{inset:18px;border-color:rgba(8,145,178,0.18);animation-delay:.7s}
+.ring-3{inset:36px;border-color:rgba(29,111,232,0.12);animation-delay:1.4s}
+@keyframes ringFloat{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.03)}}
+.call-btn{
+  width:78px;height:78px;border-radius:50%;border:none;cursor:pointer;z-index:5;position:relative;
+  background:linear-gradient(145deg,var(--blue2),var(--teal));
+  display:flex;align-items:center;justify-content:center;font-size:1.8rem;
+  box-shadow:0 4px 20px rgba(29,111,232,0.4),0 0 0 3px rgba(29,111,232,0.12);
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s;
+}
+.call-btn:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(29,111,232,0.5),0 0 0 4px rgba(29,111,232,0.18)}
+.call-btn:active{transform:scale(.94)}
+
+/* Ring states */
+.ring-sys.CONNECTING .ring{border-color:rgba(217,119,6,0.4);animation:ringFloat .9s ease-in-out infinite}
+.ring-sys.CONNECTING .call-btn{background:linear-gradient(145deg,var(--orange),#b45309);animation:spin 1s linear infinite}
+.ring-sys.LISTENING .ring{border-color:rgba(220,38,38,0.5);animation:lisRing .4s ease-in-out infinite alternate}
+.ring-sys.LISTENING .call-btn{background:linear-gradient(145deg,var(--red),#b91c1c)}
+.ring-sys.SPEAKING .ring{border-color:rgba(5,150,105,0.45);animation:spkRing .35s ease-in-out infinite alternate}
+.ring-sys.SPEAKING .call-btn{background:linear-gradient(145deg,var(--green),var(--teal))}
+.ring-sys.ACTIVE .ring{border-color:rgba(124,58,237,0.35);animation:ringFloat 1.8s ease-in-out infinite}
+.ring-sys.ACTIVE .call-btn{background:linear-gradient(145deg,var(--purple),var(--blue));animation:breathe 2s ease-in-out infinite}
+.ring-sys.EMERGENCY .ring{border-color:rgba(220,38,38,0.8);animation:emergRing .3s ease-in-out infinite alternate}
+.ring-sys.EMERGENCY .call-btn{background:linear-gradient(145deg,#991b1b,var(--red));animation:emergPulse .5s ease-in-out infinite alternate}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes lisRing{from{opacity:.3;transform:scale(.9)}to{opacity:1;transform:scale(1.1)}}
+@keyframes spkRing{from{opacity:.2;transform:scale(.92)}to{opacity:.9;transform:scale(1.12)}}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes emergRing{from{opacity:.4;transform:scale(.88)}to{opacity:1;transform:scale(1.15)}}
+@keyframes emergPulse{from{box-shadow:0 4px 20px rgba(220,38,38,0.4)}to{box-shadow:0 4px 40px rgba(220,38,38,0.9)}}
+
+.state-lbl{font-size:0.64rem;font-family:var(--font-mono);letter-spacing:0.1em;text-transform:uppercase;text-align:center;transition:color .3s;font-weight:500}
+.state-lbl.IDLE{color:var(--text3)}
+.state-lbl.CONNECTING{color:var(--orange)}
+.state-lbl.LISTENING{color:var(--red)}
+.state-lbl.SPEAKING{color:var(--green)}
+.state-lbl.ACTIVE{color:var(--blue)}
+.state-lbl.EMERGENCY{color:var(--red);font-weight:600;animation:pulse .5s ease infinite}
+
+/* Waveform */
+.wv{display:flex;align-items:center;gap:3px;height:28px}
+.wb{width:3px;border-radius:2px;background:var(--border2);transition:background .4s}
+.wv.on .wb{background:var(--blue)}
+.wv.on .wb:nth-child(odd){animation:waveA .5s ease-in-out infinite}
+.wv.on .wb:nth-child(even){animation:waveA .5s ease-in-out infinite .15s}
+@keyframes waveA{0%,100%{height:3px}50%{height:24px}}
+.wv.emergency .wb{background:var(--red)}
+
+/* Barge-in */
+.barge-pill{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;background:var(--red-lt);border:1px solid var(--red-md);font-size:.62rem;font-family:var(--font-mono);color:var(--red);opacity:0;transition:opacity .3s}
+.barge-pill.on{opacity:1}
+.barge-dot{width:5px;height:5px;border-radius:50%;background:var(--red);animation:pulse .8s infinite}
+
+/* Volume */
+.vol-row{display:flex;align-items:center;gap:8px;width:100%}
+.vol-bg{flex:1;height:3px;background:var(--bg2);border-radius:2px;overflow:hidden}
+.vol-fg{height:100%;width:0%;background:linear-gradient(90deg,var(--blue),var(--teal));border-radius:2px;transition:width 0.1s}
+.vol-lbl{font-size:.58rem;font-family:var(--font-mono);color:var(--text3);min-width:26px;text-align:right}
+
+/* Tool flash */
+.tool-flash{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--blue-lt);border:1px solid var(--blue-md);border-radius:8px;font-size:.65rem;font-family:var(--font-mono);color:var(--blue);width:100%;opacity:0;transform:translateY(3px);transition:all .2s}
+.tool-flash.on{opacity:1;transform:translateY(0)}
+.tool-spinner{width:11px;height:11px;border:2px solid rgba(29,111,232,0.2);border-top-color:var(--blue);border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0}
+
+/* EMERGENCY BANNER */
+.emg-banner{
+  display:none;flex-direction:column;gap:6px;padding:14px 16px;
+  background:linear-gradient(135deg,#fef2f2,#fff1f2);
+  border:2px solid var(--red);border-radius:10px;width:100%;
+  animation:emergBorder .8s ease infinite alternate;
+}
+.emg-banner.show{display:flex}
+@keyframes emergBorder{from{border-color:var(--red)}to{border-color:#fca5a5}}
+.emg-title{font-size:.78rem;font-weight:600;color:var(--red);display:flex;align-items:center;gap:7px}
+.emg-body{font-size:.68rem;color:#7f1d1d;line-height:1.6}
+.emg-loc{font-size:.6rem;font-family:var(--font-mono);color:#9f1239;margin-top:4px;background:var(--red-lt);padding:5px 8px;border-radius:6px;word-break:break-all}
+
+/* Lang indicator */
+.lang-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:var(--purple-lt);border:1px solid rgba(124,58,237,0.2);border-radius:20px;font-size:.62rem;font-family:var(--font-mono);color:var(--purple);transition:all .3s}
+
+/* ── TRANSCRIPT ── */
+.transcript-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);display:flex;flex-direction:column;min-height:500px}
+.tc-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.tc-title{font-size:.72rem;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:0.06em}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.5s ease infinite}
+.tc-actions{display:flex;align-items:center;gap:8px}
+.clr-btn{font-size:.65rem;font-family:var(--font-mono);color:var(--text3);background:none;border:1px solid var(--border2);border-radius:6px;padding:4px 10px;cursor:pointer;transition:all .2s}
+.clr-btn:hover{color:var(--red);border-color:var(--red-md)}
+.tc-body{flex:1;padding:16px 18px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
+.eph{margin:auto;text-align:center}
+.eph-icon{font-size:36px;opacity:.18;display:block;margin-bottom:14px}
+.eph-title{font-size:1.1rem;font-weight:400;color:var(--text2);margin-bottom:8px;font-family:var(--font-serif);font-style:italic}
+.eph-sub{font-size:.72rem;color:var(--text3);font-family:var(--font-mono);line-height:2}
+.msg{display:flex;flex-direction:column;gap:3px;animation:msgIn .2s ease-out both}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{align-items:flex-end}
+.msg.agent{align-items:flex-start}
+.msg.sys{align-items:center}
+.msg-label{font-size:.56rem;font-family:var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:2px}
+.msg-bub{max-width:82%;padding:10px 15px;border-radius:12px;font-size:.85rem;line-height:1.65;letter-spacing:0.005em}
+.msg.user .msg-bub{background:var(--blue);color:white;border-bottom-right-radius:3px}
+.msg.agent .msg-bub{background:var(--blue-lt);color:var(--text);border:1px solid var(--blue-md);border-bottom-left-radius:3px;font-family:var(--font-serif);font-size:.9rem;line-height:1.7}
+.msg.sys .msg-bub{background:var(--bg2);color:var(--text2);border:1px solid var(--border);font-size:.7rem;font-family:var(--font-mono);border-radius:8px;max-width:100%;padding:7px 12px;text-align:center}
+.msg.emergency .msg-bub{background:var(--red-lt);color:var(--red);border:1px solid var(--red-md);font-weight:500}
+.tdots{display:flex;gap:4px;padding:10px 14px;background:var(--blue-lt);border:1px solid var(--blue-md);border-radius:12px;border-bottom-left-radius:3px;width:fit-content}
+.tdots span{width:5px;height:5px;border-radius:50%;background:var(--blue);opacity:.3;animation:dotBounce 1s ease-in-out infinite}
+.tdots span:nth-child(2){animation-delay:.12s}.tdots span:nth-child(3){animation-delay:.24s}
+@keyframes dotBounce{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+.tc-input{display:flex;gap:8px;padding:12px 18px;border-top:1px solid var(--border);background:var(--bg)}
+.tc-input input{flex:1;background:var(--white);border:1px solid var(--border2);border-radius:8px;padding:9px 14px;color:var(--text);font-family:var(--font-sans);font-size:.82rem;outline:none;transition:border-color .2s}
+.tc-input input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(29,111,232,0.08)}
+.tc-input input::placeholder{color:var(--text3)}
+.send-btn{padding:9px 18px;border:none;border-radius:8px;cursor:pointer;background:var(--blue);color:white;font-family:var(--font-sans);font-size:.8rem;font-weight:600;transition:all .2s}
+.send-btn:hover{background:var(--blue2);transform:translateY(-1px)}
+
+/* ── BOTTOM GRID ── */
+.bottom-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;grid-column:1/-1}
+
+/* Status */
+.status-row{display:flex;align-items:center;gap:7px;padding:9px 12px;border-radius:8px;font-size:.7rem;font-family:var(--font-mono)}
+.status-row.ok{background:var(--green-lt);border:1px solid var(--green-md);color:var(--green)}
+.status-row.warn{background:var(--orange-lt);border:1px solid var(--orange-md);color:var(--orange)}
+.status-row.err{background:var(--red-lt);border:1px solid var(--red-md);color:var(--red)}
+.sdot{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 2s infinite;flex-shrink:0}
+
+/* Stats grid */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:11px 13px}
+.stat-num{font-size:1.6rem;font-weight:700;font-family:var(--font-mono);line-height:1}
+.stat-lbl{font-size:.58rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);font-family:var(--font-mono);margin-top:3px}
+.stat-blue{color:var(--blue)}.stat-green{color:var(--green)}.stat-orange{color:var(--orange)}.stat-red{color:var(--red)}
+
+/* Tags */
+.feature-tags{display:flex;flex-wrap:wrap;gap:5px}
+.ftag{display:flex;align-items:center;gap:4px;padding:3px 8px;border-radius:5px;font-size:.6rem;font-family:var(--font-mono);border:1px solid}
+.ftag-green{background:var(--green-lt);border-color:var(--green-md);color:var(--green)}
+.ftag-blue{background:var(--blue-lt);border-color:var(--blue-md);color:var(--blue)}
+.ftag-orange{background:var(--orange-lt);border-color:var(--orange-md);color:var(--orange)}
+
+/* Notification channel badges */
+.notif-channels{display:flex;flex-wrap:wrap;gap:6px}
+.nchan{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:7px;font-size:.65rem;font-family:var(--font-mono);border:1px solid;cursor:default}
+.nc-green{background:var(--green-lt);border-color:var(--green-md);color:var(--green)}
+.nc-blue{background:var(--blue-lt);border-color:var(--blue-md);color:var(--blue)}
+.nc-orange{background:var(--orange-lt);border-color:var(--orange-md);color:var(--orange)}
+.nc-gray{background:var(--bg2);border-color:var(--border2);color:var(--text3)}
+.nc-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+
+/* Booking feed */
+.feed-list{display:flex;flex-direction:column;gap:7px;max-height:240px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
+.feed-empty{font-size:.7rem;font-family:var(--font-mono);color:var(--text3);text-align:center;padding:24px 0;line-height:2.2}
+.booking-row{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;animation:msgIn .3s ease-out both}
+.br-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.br-ref{font-size:.6rem;font-family:var(--font-mono);color:var(--blue);font-weight:500}
+.urg-badge{font-size:.52rem;padding:2px 7px;border-radius:4px;font-family:var(--font-mono);font-weight:500}
+.urg-c{background:var(--red-lt);border:1px solid var(--red-md);color:var(--red)}
+.urg-h{background:var(--orange-lt);border:1px solid var(--orange-md);color:var(--orange)}
+.urg-m{background:var(--blue-lt);border:1px solid var(--blue-md);color:var(--blue)}
+.urg-l{background:var(--green-lt);border:1px solid var(--green-md);color:var(--green)}
+.br-name{font-size:.8rem;font-weight:600;color:var(--text);margin-bottom:2px}
+.br-detail{font-size:.68rem;color:var(--text2)}
+.br-doctor{font-size:.62rem;color:var(--text3);margin-top:1px}
+
+/* Tool log */
+.tool-log{display:flex;flex-direction:column;gap:5px;max-height:130px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
+.tlog-row{display:flex;align-items:center;gap:7px;padding:7px 10px;background:var(--bg);border:1px solid var(--border);border-radius:7px;font-size:.62rem;font-family:var(--font-mono);animation:msgIn .2s ease-out both}
+.tl-name{color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tl-ok{color:var(--green)}.tl-err{color:var(--red)}.tl-pend{color:var(--orange)}
+.tl-ts{color:var(--text3);font-size:.54rem;flex-shrink:0}
+
+/* Scenarios */
+.scenarios{display:flex;flex-direction:column;gap:5px}
+.sc-row{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--white);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .18s}
+.sc-row:hover{border-color:var(--blue);background:var(--blue-lt);transform:translateX(3px)}
+.sc-bar{width:3px;height:32px;border-radius:2px;flex-shrink:0}
+.sc-txt{font-size:.72rem;color:var(--text2);flex:1;line-height:1.4}
+.sc-arr{font-size:.7rem;color:var(--text3);opacity:0;transition:all .18s}
+.sc-row:hover .sc-arr{opacity:1;color:var(--blue)}
+
+/* Emergency feed */
+.emg-list{display:flex;flex-direction:column;gap:6px;max-height:120px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--red-md) transparent}
+.emg-row{background:var(--red-lt);border:1px solid var(--red-md);border-radius:7px;padding:8px 10px;font-size:.65rem;animation:msgIn .3s ease-out both}
+.emg-row-id{font-family:var(--font-mono);color:var(--red);font-weight:500;margin-bottom:2px}
+.emg-row-txt{color:#7f1d1d;line-height:1.5}
+
+/* Status bar */
+.statusbar{background:var(--white);border-top:1px solid var(--border);padding:8px 24px;display:flex;align-items:center;gap:16px;font-size:.6rem;font-family:var(--font-mono);color:var(--text3)}
+.sbar-dot{width:5px;height:5px;border-radius:50%;background:var(--border2)}
+.sbar-dot.ok{background:var(--green)}
+.sbar-dot.warn{background:var(--orange)}
+.sbar-item{display:flex;align-items:center;gap:5px}
+#sb-state{color:var(--blue);font-weight:500}
+#sb-lang{color:var(--purple);font-weight:500}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--white);border:1px solid var(--border2);border-radius:10px;padding:10px 18px;font-size:.75rem;color:var(--text);box-shadow:var(--shadow-lg);transform:translateX(120%);transition:transform .3s cubic-bezier(.34,1.56,.64,1);z-index:999;max-width:300px;line-height:1.5}
+.toast.show{transform:translateX(0)}
+.toast.toast-err{border-color:var(--red-md);background:var(--red-lt);color:var(--red)}
+.toast.toast-emg{border-color:var(--red);background:#fff;color:var(--red);font-weight:600}
+
+/* Decorative cross pattern top-right */
+.deco-cross{position:fixed;top:80px;right:-40px;width:200px;height:200px;opacity:.04;pointer-events:none}
+
+@media(max-width:1024px){.page{grid-template-columns:1fr}.bottom-grid{grid-template-columns:1fr}}
+@media(max-width:640px){.bottom-grid{grid-template-columns:1fr}.topbar-pills{display:none}}
+</style>
+</head>
+<body>
+
+<!-- Decorative healthcare cross -->
+<svg class="deco-cross" viewBox="0 0 100 100"><rect x="35" y="10" width="30" height="80" fill="#1d6fe8"/><rect x="10" y="35" width="80" height="30" fill="#1d6fe8"/></svg>
+
+<!-- ══ TOPBAR ══ -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="logo-mark">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="2" width="4" height="20" rx="2" fill="white"/>
+        <rect x="2" y="10" width="20" height="4" rx="2" fill="white"/>
+      </svg>
+    </div>
+    <div>
+      <div class="logo-text">ShadowQuant Smart Clinic</div>
+      <div class="logo-sub">Autonomous Voice AI · 24/7</div>
+    </div>
+    <div class="topbar-pills">
+      <span class="pill pill-green"><span class="pill-dot"></span>Aria online</span>
+      <span class="pill pill-blue"><span class="pill-dot"></span>OpenAI Realtime</span>
+      <span class="lang-chip" id="langChip">🌐 Language auto-detect</span>
+    </div>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- ══ LEFT PANEL ══ -->
+  <div class="page-left">
+
+    <!-- ORB PANEL -->
+    <div class="orb-card">
+      <div class="orb-inner">
+
+        <div class="tech-badge">
+          <span class="tech-dot"></span>
+          <div>
+            <div class="tech-label">AI Voice · Real-time WebRTC</div>
+            <div class="tech-sub">Voice AI · Real-time · Multilingual</div>
+          </div>
+        </div>
+
+        <!-- Emergency banner -->
+        <div class="emg-banner" id="emgBanner">
+          <div class="emg-title">🚨 EMERGENCY SERVICES ALERTED</div>
+          <div class="emg-body" id="emgBody">Dispatching ambulance to your location. Stay calm. Help is coming.</div>
+          <div class="emg-loc" id="emgLoc"></div>
+        </div>
+
+        <div class="ring-sys IDLE" id="ringS">
+          <div class="ring ring-1"></div>
+          <div class="ring ring-2"></div>
+          <div class="ring ring-3"></div>
+          <button class="call-btn" id="callBtn" onclick="handleCall()">📞</button>
+        </div>
+
+        <div class="wv" id="wv">
+          <div class="wb" style="height:3px"></div><div class="wb" style="height:7px"></div>
+          <div class="wb" style="height:12px"></div><div class="wb" style="height:5px"></div>
+          <div class="wb" style="height:18px"></div><div class="wb" style="height:10px"></div>
+          <div class="wb" style="height:22px"></div><div class="wb" style="height:13px"></div>
+          <div class="wb" style="height:16px"></div><div class="wb" style="height:7px"></div>
+          <div class="wb" style="height:11px"></div><div class="wb" style="height:4px"></div>
+        </div>
+
+        <div class="state-lbl IDLE" id="stateLbl">Click to start WebRTC call</div>
+
+        <div class="barge-pill" id="barge">
+          <span class="barge-dot"></span>Speaking — interrupt by talking
+        </div>
+
+        <div class="vol-row">
+          <div class="vol-bg"><div class="vol-fg" id="volBar"></div></div>
+          <div class="vol-lbl" id="volLbl">0%</div>
+        </div>
+
+        <div class="tool-flash" id="toolFlash">
+          <div class="tool-spinner"></div>
+          <span id="toolFlashTxt">Processing…</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- NOTIFICATION CHANNELS -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📱 Notification channels</div>
+        <span class="card-badge badge-blue" id="notifBadge">Auto-detect</span>
+      </div>
+      <div style="padding:14px 18px;display:flex;flex-direction:column;gap:10px">
+        <div class="notif-channels">
+          <div class="nchan nc-green" id="nc-sms"><span class="nc-dot"></span>SMS</div>
+          <div class="nchan nc-green" id="nc-wa"><span class="nc-dot"></span>WhatsApp</div>
+          <div class="nchan nc-blue" id="nc-tg"><span class="nc-dot"></span>Telegram</div>
+        </div>
+        <div style="font-size:.65rem;color:var(--text3);font-family:var(--font-mono);line-height:1.7">
+          Booking confirmations auto-sent after each appointment via SMS, WhatsApp, or Telegram.
+        </div>
+      </div>
+    </div>
+
+    <!-- LANGUAGE DETECTION -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🌐 Language mode</div>
+        <span class="card-badge" id="langBadge" style="background:var(--purple-lt);border:1px solid rgba(124,58,237,0.2);color:var(--purple)">Auto-detect</span>
+      </div>
+      <div style="padding:14px 18px">
+        <div style="font-size:.7rem;color:var(--text2);line-height:1.8">
+          Aria detects your language on first message and continues in it throughout the call.
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
+          <span style="font-size:.65rem;padding:3px 9px;border-radius:5px;background:var(--bg2);border:1px solid var(--border2);color:var(--text2)">English</span>
+          <span style="font-size:.65rem;padding:3px 9px;border-radius:5px;background:var(--bg2);border:1px solid var(--border2);color:var(--text2)">हिंदी</span>
+          <span style="font-size:.65rem;padding:3px 9px;border-radius:5px;background:var(--bg2);border:1px solid var(--border2);color:var(--text2)">ಕನ್ನಡ</span>
+          <span style="font-size:.65rem;padding:3px 9px;border-radius:5px;background:var(--bg2);border:1px solid var(--border2);color:var(--text2)">தமிழ்</span>
+          <span style="font-size:.65rem;padding:3px 9px;border-radius:5px;background:var(--bg2);border:1px solid var(--border2);color:var(--text2)">తెలుగు</span>
+          <span style="font-size:.65rem;padding:3px 9px;border-radius:5px;background:var(--bg2);border:1px solid var(--border2);color:var(--text2)">+ any</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page-left -->
+
+  <!-- ══ RIGHT PANEL ══ -->
+  <div class="page-right">
+
+    <!-- TRANSCRIPT -->
+    <div class="transcript-card">
+      <div class="tc-header">
+        <div class="tc-title"><span class="live-dot"></span>Live conversation</div>
+        <div class="tc-actions">
+          <span id="langDisplay" style="font-size:.62rem;font-family:var(--font-mono);color:var(--purple);display:none"></span>
+          <button class="clr-btn" onclick="clearChat()">Clear</button>
+        </div>
+      </div>
+      <div class="tc-body" id="transcript">
+        <div class="eph" id="eph">
+          <span class="eph-icon">⊕</span>
+          <div class="eph-title">Aria is ready to help</div>
+          <div class="eph-sub">
+            Click the call button to start a real-time voice call.<br/>
+            Speak in any language — Aria will respond in kind.
+          </div>
+        </div>
+      </div>
+      <div class="tc-input">
+        <input id="textInp" placeholder='Type: "Book Monday 10am" or "I have a toothache"…' onkeydown="if(event.key==='Enter')sendText()"/>
+        <button class="send-btn" onclick="sendText()">Send →</button>
+      </div>
+    </div>
+
+    <!-- BOTTOM GRID -->
+    <div class="bottom-grid">
+
+      <!-- STATUS + STATS -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">⚙️ System status</div>
+          <span class="card-badge badge-green" id="rtBadge">Realtime ready</span>
+        </div>
+        <div style="padding:14px 18px;display:flex;flex-direction:column;gap:10px">
+          <div class="status-row warn" id="connRow">
+            <div class="sdot"></div><span id="connTxt">Initializing…</span>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-box"><div class="stat-num stat-blue" id="s-turns">0</div><div class="stat-lbl">Turns</div></div>
+            <div class="stat-box"><div class="stat-num stat-green" id="s-books">0</div><div class="stat-lbl">Bookings</div></div>
+            <div class="stat-box"><div class="stat-num stat-orange" id="s-tools">0</div><div class="stat-lbl">Tool calls</div></div>
+            <div class="stat-box"><div class="stat-num stat-red" id="s-esc">0</div><div class="stat-lbl">Escalations</div></div>
+          </div>
+          <div class="feature-tags">
+            <div class="ftag ftag-green">WebRTC</div>
+            <div class="ftag ftag-green">Real barge-in</div>
+            <div class="ftag ftag-blue">Agentic loop</div>
+            <div class="ftag ftag-blue">Multilingual</div>
+            <div class="ftag ftag-orange">Emergency dispatch</div>
+            <div class="ftag ftag-blue">Google Sheets</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOOKINGS FEED -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📅 Live booking feed</div>
+          <span class="card-badge badge-green" id="feedBadge">0 confirmed</span>
+        </div>
+        <div style="padding:10px 14px">
+          <div class="feed-list" id="bookFeed">
+            <div class="feed-empty">No bookings yet.<br/>Appointments confirmed in real-time<br/>with auto SMS/WhatsApp notification.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOOLS + SCENARIOS -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">🔧 Tools &amp; scenarios</div></div>
+        <div style="padding:10px 14px;display:flex;flex-direction:column;gap:10px">
+          <div class="tool-log" id="toolLog">
+            <div style="font-size:.65rem;font-family:var(--font-mono);color:var(--text3);text-align:center;padding:10px 0">Waiting for tool calls…</div>
+          </div>
+          <div style="font-size:.6rem;font-family:var(--font-mono);color:var(--text3);text-transform:uppercase;letter-spacing:.1em">Quick scenarios</div>
+          <div class="scenarios">
+            <div class="sc-row" onclick="fireQ('ನನ್ನ ದವಡೆಯಲ್ಲಿ ತೀವ್ರ ನೋವು ಇದೆ, ತಕ್ಷಣ ಸಹಾಯ ಬೇಕು')"><div class="sc-bar" style="background:var(--red)"></div><span class="sc-txt">ಕನ್ನಡ — Severe jaw pain (Kannada)</span><span class="sc-arr">→</span></div>
+            <div class="sc-row" onclick="fireQ('मुझे सोमवार को दांत की अपॉइंटमेंट चाहिए')"><div class="sc-bar" style="background:var(--orange)"></div><span class="sc-txt">हिंदी — Monday appointment (Hindi)</span><span class="sc-arr">→</span></div>
+            <div class="sc-row" onclick="fireQ('I have a severe jaw swelling and unbearable pain')"><div class="sc-bar" style="background:var(--red)"></div><span class="sc-txt">Emergency — severe jaw swelling</span><span class="sc-arr">→</span></div>
+            <div class="sc-row" onclick="fireQ('Routine dental checkup this Saturday please')"><div class="sc-bar" style="background:var(--green)"></div><span class="sc-txt">Routine Saturday checkup</span><span class="sc-arr">→</span></div>
+            <div class="sc-row" onclick="fireQ('Book me for Sunday at 11am')"><div class="sc-bar" style="background:var(--blue)"></div><span class="sc-txt">Sunday 11am — closed day test</span><span class="sc-arr">→</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /bottom-grid -->
+
+  </div><!-- /page-right -->
+
+</div><!-- /page -->
+
+<!-- STATUSBAR -->
+<div class="statusbar">
+  <div class="sbar-item"><div class="sbar-dot" id="dot-srv"></div>Server</div>
+  <div class="sbar-item"><div class="sbar-dot" id="dot-rt"></div>Realtime API</div>
+  <div class="sbar-item"><div class="sbar-dot ok"></div>WebRTC</div>
+  <div class="sbar-item"><div class="sbar-dot ok"></div>Barge-in</div>
+  <div class="sbar-item"><div class="sbar-dot ok"></div>Emergency dispatch</div>
+  <div class="sbar-item" style="margin-left:auto">State: <span id="sb-state">idle</span></div>
+  <div class="sbar-item">Lang: <span id="sb-lang">detecting…</span></div>
+  <div class="sbar-item">Turns: <span id="sb-turns">0</span></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ════════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════════ */
+let appState = 'IDLE';
+let rtcPc = null, rtcDc = null, rtcActive = false;
+let audioCtx = null, analyser = null, volRaf = null;
+let chatHistory = [];
+let turns = 0, tools = 0, books = 0, escs = 0;
+let detectedLang = null;
+let userLat = null, userLng = null;
+
+/* ════════════════════════════════════════════════════
+   GEOLOCATION — get user location silently for emergency
+════════════════════════════════════════════════════ */
+function requestLocation() {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      userLat = pos.coords.latitude;
+      userLng = pos.coords.longitude;
+      console.log(`[Location] ${userLat.toFixed(4)}, ${userLng.toFixed(4)}`);
+    },
+    err => console.log('[Location] Not available:', err.message),
+    { timeout: 8000, maximumAge: 60000 }
+  );
+}
+
+/* ════════════════════════════════════════════════════
+   OPENAI REALTIME — WebRTC
+════════════════════════════════════════════════════ */
+async function startRealtimeCall() {
+  setState('CONNECTING');
+  showToast('🔗 Connecting to OpenAI Realtime…');
+  requestLocation(); // silently request GPS for emergency dispatch
+
+  try {
+    const tokenResp = await fetch('/api/realtime-token', { method: 'POST' });
+    if (!tokenResp.ok) { const e = await tokenResp.json(); throw new Error(e.error || 'Token request failed'); }
+    const { client_secret } = await tokenResp.json();
+    const ephemeralKey = client_secret.value;
+
+    rtcPc = new RTCPeerConnection();
+
+    // Audio output
+    const audioEl = document.createElement('audio');
+    audioEl.autoplay = true;
+    rtcPc.ontrack = e => {
+      audioEl.srcObject = e.streams[0];
+      if (!audioCtx) audioCtx = new AudioContext();
+      const src = audioCtx.createMediaStreamSource(e.streams[0]);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 256;
+      src.connect(analyser);
+      startVolAnim();
+    };
+
+    // Mic input
+    const mic = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mic.getTracks().forEach(t => rtcPc.addTrack(t, mic));
+
+    // DataChannel
+    rtcDc = rtcPc.createDataChannel('oai-events');
+    rtcDc.onopen = () => {
+      rtcActive = true;
+      setState('ACTIVE');
+      addMsg('sys', '✅ OpenAI Realtime WebRTC connected — Aria is listening');
+      showToast('📞 Call connected — speak in any language');
+      document.getElementById('dot-rt').className = 'sbar-dot ok';
+      document.getElementById('rtBadge').className = 'card-badge badge-green';
+      document.getElementById('rtBadge').textContent = 'Connected';
+      document.getElementById('connRow').className = 'status-row ok';
+      document.getElementById('connTxt').textContent = 'OpenAI Realtime WebRTC · Active';
+    };
+    rtcDc.onmessage = e => handleRealtimeEvent(JSON.parse(e.data));
+    rtcDc.onclose = () => { rtcActive = false; setState('IDLE'); stopVolAnim(); };
+
+    const offer = await rtcPc.createOffer();
+    await rtcPc.setLocalDescription(offer);
+
+    const sdpResp = await fetch(`https://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${ephemeralKey}`, 'Content-Type': 'application/sdp' },
+      body: offer.sdp
+    });
+    if (!sdpResp.ok) throw new Error(`OpenAI SDP error: ${sdpResp.status}`);
+    await rtcPc.setRemoteDescription({ type: 'answer', sdp: await sdpResp.text() });
+
+    addMsg('sys', '🎙️ Aria listening — speak in any language. ಕನ್ನಡ, हिंदी, English, or any language you prefer.');
+
+  } catch(e) {
+    console.error('Realtime error:', e);
+    setState('IDLE');
+    addMsg('agent', '⚠️ Could not start call: ' + e.message);
+    showToast('❌ Call failed — check server logs', 'err');
+    document.getElementById('connRow').className = 'status-row err';
+    document.getElementById('connTxt').textContent = 'Connection failed: ' + e.message;
+  }
+}
+
+function stopRealtimeCall() {
+  if (rtcPc) { rtcPc.close(); rtcPc = null; }
+  rtcDc = null; rtcActive = false;
+  stopVolAnim();
+  setState('IDLE');
+  addMsg('sys', '📵 Call ended');
+  showToast('📵 Call ended');
+  document.getElementById('rtBadge').textContent = 'Realtime ready';
+  document.getElementById('connRow').className = 'status-row warn';
+  document.getElementById('connTxt').textContent = 'Click call button to reconnect';
+  document.getElementById('dot-rt').className = 'sbar-dot';
+}
+
+/* ════════════════════════════════════════════════════
+   REALTIME EVENT HANDLER
+════════════════════════════════════════════════════ */
+async function handleRealtimeEvent(ev) {
+  const t = ev.type;
+
+  // User transcript
+  if (t === 'conversation.item.input_audio_transcription.completed') {
+    const txt = ev.transcript?.trim();
+    if (txt) {
+      addMsg('user', txt);
+      turns++;
+      document.getElementById('s-turns').textContent = turns;
+      document.getElementById('sb-turns').textContent = turns;
+      // Detect language from first user message
+      if (!detectedLang) detectLanguage(txt);
+    }
+  }
+
+  // Agent transcript
+  if (t === 'response.audio_transcript.done') {
+    const txt = ev.transcript?.trim();
+    if (txt) addMsg('agent', txt);
+  }
+
+  // Agent speaking
+  if (t === 'response.audio.started' || t === 'response.created') {
+    setState('SPEAKING');
+    document.getElementById('barge').className = 'barge-pill on';
+  }
+
+  // Agent done speaking
+  if (t === 'response.audio.done' || t === 'response.done') {
+    if (rtcActive) { setState('ACTIVE'); document.getElementById('barge').className = 'barge-pill'; }
+  }
+
+  // VAD — user started speaking  ★ TRUE BARGE-IN ★
+  // If AI is currently speaking, interrupt it immediately:
+  //   1. response.cancel  → stops the model from generating more audio
+  //   2. output_audio_buffer.clear → flushes buffered audio so speaker stops NOW
+  if (t === 'input_audio_buffer.speech_started') {
+    if (appState === 'SPEAKING' && rtcDc && rtcDc.readyState === 'open') {
+      // Step 1: cancel the current response
+      rtcDc.send(JSON.stringify({ type: 'response.cancel' }));
+      // Step 2: flush the audio playback buffer immediately
+      rtcDc.send(JSON.stringify({ type: 'output_audio_buffer.clear' }));
+      addMsg('sys', '🎤 Interrupted — listening…');
+    }
+    setState('LISTENING');
+    document.getElementById('barge').className = 'barge-pill';
+  }
+  if (t === 'input_audio_buffer.speech_stopped') {
+    if (rtcActive) setState('ACTIVE');
+  }
+  // Cancelled response confirms interruption — immediately go back to listening
+  if (t === 'response.cancelled') {
+    setState('ACTIVE');
+    document.getElementById('barge').className = 'barge-pill';
+  }
+
+  // TOOL CALL
+  if (t === 'response.function_call_arguments.done') {
+    await handleToolCall(ev.call_id, ev.name, ev.arguments);
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   LANGUAGE DETECTION  (simple heuristic)
+════════════════════════════════════════════════════ */
+function detectLanguage(text) {
+  const kannadaRange = /[\u0C80-\u0CFF]/;
+  const hindiRange   = /[\u0900-\u097F]/;
+  const tamilRange   = /[\u0B80-\u0BFF]/;
+  const teluguRange  = /[\u0C00-\u0C7F]/;
+
+  let lang = 'English', flag = '🇬🇧';
+  if (kannadaRange.test(text)) { lang='Kannada'; flag='🇮🇳'; }
+  else if (hindiRange.test(text))   { lang='Hindi';   flag='🇮🇳'; }
+  else if (tamilRange.test(text))   { lang='Tamil';   flag='🇮🇳'; }
+  else if (teluguRange.test(text))  { lang='Telugu';  flag='🇮🇳'; }
+  else if (/namaskara|namaste|naan|naanu|yen|beku|illa|aagbeku/i.test(text)) { lang='Kannada'; flag='🇮🇳'; }
+  else if (/mujhe|chahiye|karna|maine|hai|hoon|nahi|kya|accha/i.test(text)) { lang='Hindi';   flag='🇮🇳'; }
+
+  detectedLang = lang;
+  const chip = document.getElementById('langChip');
+  chip.textContent = `${flag} ${lang}`;
+  chip.style.background = '#f5f3ff';
+  chip.style.borderColor = 'rgba(124,58,237,0.3)';
+  document.getElementById('langBadge').textContent = `${flag} ${lang}`;
+  document.getElementById('langDisplay').textContent = `${flag} ${lang}`;
+  document.getElementById('langDisplay').style.display = 'inline';
+  document.getElementById('sb-lang').textContent = lang;
+  addMsg('sys', `${flag} Language detected: ${lang} — Aria will continue in ${lang}`);
+}
+
+/* ════════════════════════════════════════════════════
+   TOOL EXECUTION
+════════════════════════════════════════════════════ */
+async function handleToolCall(callId, name, argsStr) {
+  tools++;
+  document.getElementById('s-tools').textContent = tools;
+
+  const icons = { assess_urgency:'🩺', trigger_emergency:'🚨', send_booking_notification:'📱', check_availability:'📅', book_appointment:'✅', reschedule_appointment:'🔄', cancel_appointment:'❌', get_clinic_info:'ℹ️' };
+  const labels = { assess_urgency:'Assessing urgency…', trigger_emergency:'DISPATCHING EMERGENCY…', send_booking_notification:'Sending notification…', check_availability:'Checking slots…', book_appointment:'Confirming booking…', reschedule_appointment:'Rescheduling…', cancel_appointment:'Cancelling…', get_clinic_info:'Fetching info…' };
+
+  flashTool((icons[name]||'⚙️') + ' ' + (labels[name]||'Processing…'));
+  logTool(icons[name]||'⚙️', name, 'pend');
+
+  let args = {};
+  try { args = JSON.parse(argsStr); } catch(e) {}
+
+  // Inject GPS coordinates if available and this is an emergency
+  if (name === 'trigger_emergency') {
+    if (userLat && userLng) { args.lat = userLat; args.lng = userLng; }
+    setState('EMERGENCY');
+    addMsg('emergency', '🚨 CRITICAL EMERGENCY DETECTED — Dispatching emergency services to your location RIGHT NOW. Stay calm.');
+    showEmergencyBanner(args);
+    escs++;
+    document.getElementById('s-esc').textContent = escs;
+    showToast('🚨 EMERGENCY: Services dispatched!', 'emg');
+  }
+
+  // Urgency assessment UI
+  if (name === 'assess_urgency') {
+    const s = (args.symptoms||'').toLowerCase();
+    if (['severe pain','unbearable','jaw broken','swelling face','bleeding','knocked out','abscess','cannot breathe','can not breathe'].some(k=>s.includes(k))) {
+      escs++;
+      document.getElementById('s-esc').textContent = escs;
+    }
+  }
+
+  try {
+    const r = await fetch('/api/tool-call', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, arguments: argsStr === '' ? JSON.stringify(args) : argsStr })
+    });
+    const result = await r.json();
+
+    if (name === 'book_appointment' && result.status === 'confirmed') {
+      books++;
+      document.getElementById('s-books').textContent = books;
+      document.getElementById('feedBadge').textContent = books + ' confirmed';
+      setTimeout(fetchBooks, 800);
+      addMsg('sys', `✅ Booking confirmed — Ref: ${result.ref} | Notification: ${result.notification_sent || 'pending'}`);
+    }
+    if (name === 'send_booking_notification') {
+      addMsg('sys', `📱 Notification ${result.status} via ${result.channel_used || 'system'}`);
+    }
+    if (name === 'trigger_emergency' && result.emergency_id) {
+      document.getElementById('emgLoc').textContent = `ID: ${result.emergency_id} | ${result.location || 'Location tracked'}`;
+      addEmergencyToFeed(result);
+    }
+    if (name === 'cancel_appointment') { books = Math.max(0,books-1); document.getElementById('s-books').textContent = books; setTimeout(fetchBooks,800); }
+
+    logTool(icons[name]||'⚙️', name, 'ok');
+
+    // Send result back to OpenAI Realtime
+    if (rtcDc && rtcDc.readyState === 'open') {
+      rtcDc.send(JSON.stringify({
+        type: 'conversation.item.create',
+        item: { type:'function_call_output', call_id:callId, output:JSON.stringify(result) }
+      }));
+      rtcDc.send(JSON.stringify({ type:'response.create' }));
+    }
+  } catch(e) {
+    logTool(icons[name]||'⚙️', name, 'err');
+    console.error('Tool error:', e);
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   EMERGENCY UI
+════════════════════════════════════════════════════ */
+function showEmergencyBanner(args) {
+  const banner = document.getElementById('emgBanner');
+  const body   = document.getElementById('emgBody');
+  const loc    = document.getElementById('emgLoc');
+  banner.className = 'emg-banner show';
+  body.textContent = `Emergency services alerted for: ${args.symptoms||'Critical symptoms'}. Ambulance dispatched. Dr. On-Call notified.`;
+  if (userLat && userLng) {
+    loc.textContent = `📍 GPS: ${userLat.toFixed(4)}, ${userLng.toFixed(4)} — maps.google.com/?q=${userLat},${userLng}`;
+  } else if (args.address) {
+    loc.textContent = `📍 ${args.address}`;
+  } else {
+    loc.textContent = '📍 Requesting precise location…';
+  }
+  // Make waveform emergency red
+  document.getElementById('wv').classList.add('emergency');
+  // Vibrate if supported
+  if (navigator.vibrate) navigator.vibrate([200,100,200,100,400]);
+}
+
+function addEmergencyToFeed(result) {
+  // Could add to a separate emergency log panel if needed
+  console.log('[Emergency dispatched]', result);
+}
+
+/* ════════════════════════════════════════════════════
+   VOLUME ANIMATION
+════════════════════════════════════════════════════ */
+function startVolAnim() {
+  if (!analyser) return;
+  const data = new Uint8Array(analyser.frequencyBinCount);
+  function loop() {
+    analyser.getByteFrequencyData(data);
+    const avg = data.reduce((a,b)=>a+b,0)/data.length;
+    const pct = Math.min(100, Math.round(avg*2));
+    document.getElementById('volBar').style.width = pct+'%';
+    document.getElementById('volLbl').textContent = pct+'%';
+    volRaf = requestAnimationFrame(loop);
+  }
+  loop();
+}
+function stopVolAnim() {
+  if (volRaf) { cancelAnimationFrame(volRaf); volRaf=null; }
+  document.getElementById('volBar').style.width = '0%';
+  document.getElementById('volLbl').textContent = '0%';
+}
+
+/* ════════════════════════════════════════════════════
+   CALL HANDLER
+════════════════════════════════════════════════════ */
+async function handleCall() {
+  if (rtcActive) { stopRealtimeCall(); return; }
+  await startRealtimeCall();
+}
+
+/* ════════════════════════════════════════════════════
+   HTTP TEXT FALLBACK
+════════════════════════════════════════════════════ */
+async function sendText() {
+  const inp = document.getElementById('textInp');
+  const t = inp.value.trim();
+  if (!t) return;
+  inp.value = '';
+  addMsg('user', t);
+  if (!detectedLang) detectLanguage(t);
+  setState('CONNECTING');
+  addTyping();
+  try {
+    chatHistory.push({ role:'user', content:t });
+    const r = await fetch('/api/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ messages:chatHistory }) });
+    if (!r.ok) throw new Error('Server error '+r.status);
+    const d = await r.json();
+    chatHistory = d.messages;
+    removeTyping(); turns++;
+    if (d.tool_calls?.length) {
+      d.tool_calls.forEach(tc => {
+        tools++;
+        const icons = { assess_urgency:'🩺',trigger_emergency:'🚨',send_booking_notification:'📱',check_availability:'📅',book_appointment:'✅',reschedule_appointment:'🔄',cancel_appointment:'❌',get_clinic_info:'ℹ️' };
+        logTool(icons[tc.tool]||'⚙️', tc.tool, 'ok');
+        flashTool((icons[tc.tool]||'⚙️')+' '+tc.tool);
+        if (tc.tool==='trigger_emergency') { showEmergencyBanner(tc.args); escs++; document.getElementById('s-esc').textContent=escs; addMsg('emergency','🚨 EMERGENCY DISPATCHED — '+tc.result?.message); setState('EMERGENCY'); }
+        if (tc.tool==='assess_urgency'&&tc.result?.urgency==='critical') { escs++; document.getElementById('s-esc').textContent=escs; }
+        if (tc.tool==='book_appointment'&&tc.result?.status==='confirmed') { books++; document.getElementById('s-books').textContent=books; document.getElementById('feedBadge').textContent=books+' confirmed'; setTimeout(fetchBooks,800); addMsg('sys',`✅ Ref: ${tc.result.ref} | Notif: ${tc.result.notification_sent||'pending'}`); }
+        if (tc.tool==='cancel_appointment') { books=Math.max(0,books-1); document.getElementById('s-books').textContent=books; setTimeout(fetchBooks,800); }
+      });
+    }
+    if (d.reply) addMsg('agent', d.reply);
+    document.getElementById('s-turns').textContent=turns;
+    document.getElementById('sb-turns').textContent=turns;
+    document.getElementById('s-tools').textContent=tools;
+  } catch(e) { removeTyping(); addMsg('agent','⚠️ '+e.message); }
+  setState('IDLE');
+}
+
+function fireQ(txt) { document.getElementById('textInp').value=txt; sendText(); }
+
+/* ════════════════════════════════════════════════════
+   TOOL LOG + FLASH
+════════════════════════════════════════════════════ */
+function logTool(icon, name, status) {
+  const log = document.getElementById('toolLog');
+  log.querySelector('div:not(.tlog-row)')?.remove();
+  const cls = status==='ok'?'tl-ok':status==='err'?'tl-err':'tl-pend';
+  const d = document.createElement('div'); d.className='tlog-row';
+  const ts = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  d.innerHTML=`<span class="tl-name">${icon} ${name}</span><span class="${cls}">${status.toUpperCase()}</span><span class="tl-ts">${ts}</span>`;
+  log.insertBefore(d, log.firstChild);
+}
+function flashTool(txt) {
+  const f=document.getElementById('toolFlash');
+  document.getElementById('toolFlashTxt').textContent=txt;
+  f.classList.add('on'); setTimeout(()=>f.classList.remove('on'),3000);
+}
+
+/* ════════════════════════════════════════════════════
+   BOOKINGS FEED
+════════════════════════════════════════════════════ */
+async function fetchBooks() {
+  try {
+    const r=await fetch('/api/bookings'); const d=await r.json();
+    const feed=document.getElementById('bookFeed');
+    if (!d.length) { feed.innerHTML='<div class="feed-empty">No bookings yet.<br/>Appointments confirmed in real-time<br/>with auto SMS/WhatsApp notification.</div>'; return; }
+    feed.innerHTML='';
+    [...d].reverse().forEach(b=>{
+      const uc={critical:'urg-c',high:'urg-h',medium:'urg-m',low:'urg-l'}[b.urgency||'low']||'urg-l';
+      const row=document.createElement('div'); row.className='booking-row';
+      row.innerHTML=`<div class="br-top"><span class="br-ref">${b.ref}</span><span class="urg-badge ${uc}">${(b.urgency||'low').toUpperCase()}</span></div><div class="br-name">${b.patient}</div><div class="br-detail">${(b.day||'').charAt(0).toUpperCase()+(b.day||'').slice(1)} at ${b.time}</div><div class="br-doctor">${b.doctor} · ${b.service}</div>`;
+      feed.appendChild(row);
+    });
+  } catch(e) {}
+}
+
+/* ════════════════════════════════════════════════════
+   STATE MACHINE
+════════════════════════════════════════════════════ */
+const CALL_BTN = { IDLE:'📞', CONNECTING:'⏳', LISTENING:'🔴', SPEAKING:'🔊', ACTIVE:'🎙️', EMERGENCY:'🚨' };
+const CALL_LBL = { IDLE:'Click to start WebRTC call', CONNECTING:'Connecting…', LISTENING:'Listening — speak now', SPEAKING:'Speaking — interrupt anytime', ACTIVE:'Call active — always listening', EMERGENCY:'🚨 EMERGENCY — Help dispatched' };
+function setState(s) {
+  appState = s;
+  document.getElementById('ringS').className = 'ring-sys ' + s;
+  const lbl=document.getElementById('stateLbl'); lbl.className='state-lbl '+s; lbl.textContent=CALL_LBL[s];
+  document.getElementById('callBtn').textContent = CALL_BTN[s];
+  document.getElementById('sb-state').textContent = s.toLowerCase();
+  const wvOn = ['LISTENING','SPEAKING','ACTIVE','EMERGENCY'].includes(s);
+  document.getElementById('wv').className = 'wv' + (wvOn?' on':'') + (s==='EMERGENCY'?' emergency':'');
+  document.getElementById('barge').className = 'barge-pill' + (s==='SPEAKING'?' on':'');
+}
+
+/* ════════════════════════════════════════════════════
+   TRANSCRIPT HELPERS
+════════════════════════════════════════════════════ */
+function addMsg(role, txt) {
+  document.getElementById('eph')?.remove();
+  const tb=document.getElementById('transcript');
+  const d=document.createElement('div'); d.className='msg '+role;
+  const lbl=role==='user'?'👤 You':role==='sys'?'🔧 System':role==='emergency'?'🚨 EMERGENCY':'⊕ Aria';
+  d.innerHTML=`<div class="msg-label">${lbl}</div><div class="msg-bub">${esc(txt)}</div>`;
+  tb.appendChild(d); tb.scrollTop=tb.scrollHeight;
+}
+function addTyping() {
+  if (document.getElementById('typing')) return;
+  document.getElementById('eph')?.remove();
+  const tb=document.getElementById('transcript');
+  const d=document.createElement('div'); d.className='msg agent'; d.id='typing';
+  d.innerHTML=`<div class="msg-label">⊕ Aria</div><div class="tdots"><span></span><span></span><span></span></div>`;
+  tb.appendChild(d); tb.scrollTop=tb.scrollHeight;
+}
+function removeTyping() { document.getElementById('typing')?.remove(); }
+function clearChat() {
+  if (document.getElementById('emgBanner').classList.contains('show')) {
+    if (!confirm('Clear will dismiss the emergency banner too. Continue?')) return;
+  }
+  document.getElementById('transcript').innerHTML='<div class="eph" id="eph"><span class="eph-icon">⊕</span><div class="eph-title">Session cleared</div><div class="eph-sub">Ready for next call.</div></div>';
+  chatHistory=[]; turns=0; if (!rtcActive) setState('IDLE');
+  document.getElementById('emgBanner').className='emg-banner';
+  document.getElementById('wv').className='wv';
+  document.getElementById('langChip').textContent='🌐 Language auto-detect';
+  document.getElementById('langBadge').textContent='Auto-detect';
+  document.getElementById('langDisplay').style.display='none';
+  document.getElementById('sb-lang').textContent='detecting…';
+  detectedLang=null;
+  ['s-turns','s-books','s-tools','s-esc','sb-turns'].forEach(id=>document.getElementById(id).textContent='0');
+  document.getElementById('feedBadge').textContent='0 confirmed';
+  turns=0; books=0; tools=0; escs=0;
+}
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br/>'); }
+
+function showToast(msg, type) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast show'+(type?' toast-'+type:'');
+  clearTimeout(t._timeout);
+  t._timeout=setTimeout(()=>t.classList.remove('show'), type==='emg'?8000:3500);
+}
+
+/* ════════════════════════════════════════════════════
+   CHECK NOTIFICATION CONFIG
+════════════════════════════════════════════════════ */
+async function checkNotifConfig() {
+  try {
+    const r = await fetch('/api/health'); const d = await r.json();
+    const notif = d.notifications || {};
+    document.getElementById('nc-sms').className  = 'nchan ' + (notif.twilio ? 'nc-green' : 'nc-gray');
+    document.getElementById('nc-wa').className   = 'nchan ' + (notif.twilio ? 'nc-green' : 'nc-gray');
+    document.getElementById('nc-tg').className   = 'nchan ' + (notif.telegram ? 'nc-blue' : 'nc-gray');
+    const any = notif.twilio || notif.telegram;
+    document.getElementById('notifBadge').textContent = any ? 'Active' : 'Log only';
+    document.getElementById('notifBadge').className   = 'card-badge ' + (any ? 'badge-green' : 'badge-orange');
+  } catch(e) {}
+}
+
+/* ════════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════════ */
+async function init() {
+  try {
+    const r=await fetch('/api/health');
+    if (r.ok) {
+      document.getElementById('dot-srv').className='sbar-dot ok';
+      document.getElementById('connRow').className='status-row ok';
+      document.getElementById('connTxt').textContent='Server online · Voice AI active';
+      document.getElementById('dot-rt').className='sbar-dot ok';
+      addMsg('sys','✅ ShadowQuant Smart Clinic — Aria is ready · Click the call button to speak in any language');
+      await checkNotifConfig();
+    }
+  } catch(e) {
+    document.getElementById('connRow').className='status-row err';
+    document.getElementById('connTxt').textContent='Server offline — run: node server.js';
+    addMsg('sys','⚠️ Server offline. Start server.js first.');
+  }
+}
+init();
 </script>
 </body>
 </html>
