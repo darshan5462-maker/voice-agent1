@@ -1535,7 +1535,7 @@ checkServer();
 
 
 
-<!DOCTYPE html>
+<!--<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -1760,7 +1760,7 @@ body::after{
 <body>
 <div class="app">
 
-  <!-- TOPBAR -->
+  
   <div class="topbar">
     <div class="logo">
       <div class="logo-mark">⚡</div>
@@ -1782,7 +1782,7 @@ body::after{
     </div>
   </div>
 
-  <!-- MAIN -->
+
   <div class="main">
     <div class="voice-panel">
 
@@ -1811,7 +1811,7 @@ body::after{
         </div>
       </div>
 
-      <!-- Transcript -->
+    
       <div class="transcript-card">
         <div class="transcript-header">
           <div class="transcript-title">⚡ Live Session</div>
@@ -1831,10 +1831,10 @@ body::after{
 
     </div>
 
-    <!-- RIGHT PANEL -->
+
     <div class="right-panel">
 
-      <!-- Status -->
+    
       <div class="panel-card">
         <div class="panel-card-title">⚙️ System Status</div>
         <div class="panel-card-body" style="display:flex;flex-direction:column;gap:10px">
@@ -1849,7 +1849,7 @@ body::after{
         </div>
       </div>
 
-      <!-- Try asking -->
+      
       <div class="panel-card">
         <div class="panel-card-title">💡 Try Asking</div>
         <div class="panel-card-body">
@@ -1866,7 +1866,7 @@ body::after{
         </div>
       </div>
 
-      <!-- App launcher -->
+    
       <div class="panel-card">
         <div class="panel-card-title">🚀 Quick Launch</div>
         <div class="panel-card-body">
@@ -1890,7 +1890,7 @@ body::after{
     </div>
   </div>
 
-  <!-- STATUS BAR -->
+  
   <div class="statusbar">
     <div class="sb-item"><div class="sb-dot" id="dot-server"></div>Server</div>
     <div class="sb-item"><div class="sb-dot" id="dot-stt"></div>Voice</div>
@@ -2113,6 +2113,707 @@ function clearChat(){
   document.getElementById('transcript').innerHTML='<div class="empty-msg" id="emptyMsg"><div class="empty-icon">⚡</div>Session cleared.</div>';
   chatHistory=[]; turnCount=0; document.getElementById('sb-turns').textContent='0';
   window.speechSynthesis?.cancel(); if(!continuousMode) setState('IDLE');
+}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br/>')}
+
+checkServer();
+</script>
+</body>
+</html>-->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ShadowQuant — Smart Clinic Voice Agent</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#030508;--panel:#070b14;--panel2:#0a1020;
+  --border:#111828;--border2:#1a2540;
+  --v:#6d28d9;--v2:#7c3aed;--cyan:#0891b2;--cyan2:#06b6d4;
+  --green:#059669;--green2:#10b981;
+  --red:#dc2626;--amber:#d97706;--pink:#db2777;
+  --text:#f1f5f9;--text2:#94a3b8;--text3:#334155;
+  --gv:rgba(109,40,217,0.3);--gc:rgba(8,145,178,0.2);
+}
+html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse 60% 50% at 15% 15%,rgba(109,40,217,0.08),transparent 60%),
+             radial-gradient(ellipse 50% 40% at 85% 85%,rgba(8,145,178,0.06),transparent 60%);
+  pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(109,40,217,0.03) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(109,40,217,0.03) 1px,transparent 1px);
+  background-size:60px 60px;pointer-events:none;z-index:0}
+
+.app{position:relative;z-index:1;min-height:100vh;display:grid;grid-template-rows:auto 1fr auto;max-width:1200px;margin:0 auto;padding:0 20px}
+
+/* ── TOPBAR ── */
+.topbar{padding:14px 0 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-icon{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--v2),var(--cyan2));display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 0 20px var(--gv)}
+.logo-name{font-family:'Orbitron',monospace;font-size:1rem;font-weight:900;letter-spacing:0.06em;background:linear-gradient(90deg,#a78bfa,var(--cyan2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo-sub{font-size:0.55rem;font-family:'JetBrains Mono',monospace;color:var(--text3);letter-spacing:0.12em;text-transform:uppercase;margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.pill{display:flex;align-items:center;gap:5px;border-radius:6px;padding:4px 10px;font-family:'JetBrains Mono',monospace;font-size:0.62rem;letter-spacing:0.05em}
+.pill-v{background:rgba(109,40,217,0.1);border:1px solid rgba(109,40,217,0.3);color:#a78bfa}
+.pill-g{background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);color:var(--green2)}
+.pill-dot{width:5px;height:5px;border-radius:50%;background:currentColor;animation:blink 2s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+.toggle-wrap{display:flex;align-items:center;gap:6px;font-size:0.65rem;font-family:'JetBrains Mono',monospace;color:var(--text2)}
+.toggle{position:relative;width:34px;height:18px;cursor:pointer}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-sl{position:absolute;inset:0;background:var(--border2);border-radius:20px;transition:0.3s}
+.toggle-sl::before{content:'';position:absolute;width:12px;height:12px;left:3px;top:3px;background:#fff;border-radius:50%;transition:0.3s}
+.toggle input:checked+.toggle-sl{background:linear-gradient(90deg,var(--v2),var(--cyan2))}
+.toggle input:checked+.toggle-sl::before{transform:translateX(16px)}
+
+/* ── GRID ── */
+.main{padding:16px 0;display:grid;grid-template-columns:1fr 380px;gap:16px;align-items:start}
+
+/* ── LEFT COLUMN ── */
+.left{display:flex;flex-direction:column;gap:14px}
+
+/* CALL CARD */
+.call-card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:36px 24px;display:flex;flex-direction:column;align-items:center;gap:16px;position:relative;overflow:hidden}
+.call-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(109,40,217,0.05),transparent 65%)}
+
+/* Call button — the hero */
+.call-btn-wrap{position:relative;width:150px;height:150px;display:flex;align-items:center;justify-content:center}
+.call-ring{position:absolute;border-radius:50%;border:1px solid;opacity:0}
+.call-ring.r1{width:150px;height:150px;border-color:var(--v2);animation:ringPulse 3s ease-in-out infinite 0s}
+.call-ring.r2{width:118px;height:118px;border-color:var(--cyan2);animation:ringPulse 3s ease-in-out infinite 0.6s}
+.call-ring.r3{width:88px;height:88px;border-color:var(--v2);animation:ringPulse 3s ease-in-out infinite 1.2s}
+@keyframes ringPulse{0%,100%{opacity:0.12;transform:scale(1)}50%{opacity:0.45;transform:scale(1.05)}}
+.call-btn{
+  width:72px;height:72px;border-radius:50%;
+  background:linear-gradient(145deg,var(--v2),var(--cyan2));
+  border:none;cursor:pointer;position:relative;z-index:2;
+  display:flex;align-items:center;justify-content:center;font-size:1.8rem;
+  box-shadow:0 0 30px var(--gv),0 0 60px var(--gc),inset 0 1px 0 rgba(255,255,255,0.2);
+  transition:all 0.3s;
+}
+.call-btn:hover{transform:scale(1.1);box-shadow:0 0 50px var(--gv),0 0 80px var(--gc)}
+.call-btn:active{transform:scale(0.93)}
+
+/* State ring animations */
+.call-btn-wrap.LISTENING .call-ring{border-color:var(--red);animation:listenRing 0.4s ease-in-out infinite alternate}
+.call-btn-wrap.LISTENING .call-btn{background:linear-gradient(145deg,var(--red),#f97316);box-shadow:0 0 50px rgba(220,38,38,0.5)}
+@keyframes listenRing{from{opacity:0.2;transform:scale(0.94)}to{opacity:0.85;transform:scale(1.1)}}
+.call-btn-wrap.THINKING .call-btn{background:linear-gradient(145deg,var(--amber),#f97316);animation:spin 1s linear infinite;box-shadow:0 0 40px rgba(217,119,6,0.4)}
+.call-btn-wrap.THINKING .call-ring{border-color:var(--amber);animation:ringPulse 0.7s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.call-btn-wrap.SPEAKING .call-btn{background:linear-gradient(145deg,var(--green),var(--cyan2));box-shadow:0 0 50px rgba(16,185,129,0.45)}
+.call-btn-wrap.SPEAKING .call-ring{border-color:var(--green2);animation:speakRing 0.35s ease-in-out infinite alternate}
+@keyframes speakRing{from{opacity:0.2;transform:scale(0.95)}to{opacity:0.85;transform:scale(1.13)}}
+.call-btn-wrap.CONTINUOUS .call-btn{background:linear-gradient(145deg,var(--pink),var(--v2));animation:contPulse 2s ease-in-out infinite;box-shadow:0 0 50px rgba(219,39,119,0.4)}
+.call-btn-wrap.CONTINUOUS .call-ring{border-color:var(--pink);animation:ringPulse 1.5s ease-in-out infinite}
+@keyframes contPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+
+.state-label{font-family:'JetBrains Mono',monospace;font-size:0.65rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--text3);transition:color 0.3s;text-align:center}
+.state-label.LISTENING{color:var(--red)}.state-label.THINKING{color:var(--amber)}
+.state-label.SPEAKING{color:var(--green2)}.state-label.CONTINUOUS{color:var(--pink)}.state-label.IDLE{color:#7c3aed;opacity:0.8}
+
+/* Barge-in indicator */
+.barge-hint{font-size:0.7rem;color:var(--text3);text-align:center;font-family:'Inter',sans-serif;opacity:0;transition:opacity 0.3s}
+.barge-hint.show{opacity:1}
+
+/* Waveform */
+.wave{display:flex;align-items:center;gap:3px;height:28px}
+.wave .b{width:3px;background:var(--border2);border-radius:2px}
+.wave.active .b{background:linear-gradient(to top,var(--v2),var(--cyan2))}
+.wave.active .b:nth-child(odd){animation:wv 0.55s ease-in-out infinite}
+.wave.active .b:nth-child(even){animation:wv 0.55s ease-in-out infinite 0.15s}
+@keyframes wv{0%,100%{height:4px}50%{height:24px}}
+
+/* Tool activity */
+.tool-flash{display:none;align-items:center;gap:8px;padding:8px 14px;background:rgba(109,40,217,0.08);border:1px solid rgba(109,40,217,0.2);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#a78bfa;animation:flashIn 0.3s ease-out}
+.tool-flash.show{display:flex}
+@keyframes flashIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.tool-icon{font-size:1rem}
+
+/* TRANSCRIPT */
+.transcript-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.tc-header{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.tc-title{font-family:'JetBrains Mono',monospace;font-size:0.65rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2)}
+.clear-btn{font-size:0.6rem;font-family:'JetBrains Mono',monospace;color:var(--text3);background:none;border:1px solid var(--border);border-radius:4px;padding:2px 7px;cursor:pointer;transition:all 0.2s}
+.clear-btn:hover{color:var(--red);border-color:rgba(220,38,38,0.4)}
+.tc-body{height:240px;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:9px;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.empty-msg{margin:auto;text-align:center;color:var(--text3);font-size:0.75rem;line-height:2;font-family:'JetBrains Mono',monospace}
+.msg{display:flex;flex-direction:column;gap:3px;animation:mIn 0.2s ease-out both}
+@keyframes mIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{align-items:flex-end}.msg.agent{align-items:flex-start}.msg.system{align-items:center}
+.msg-who{font-size:0.56rem;font-family:'JetBrains Mono',monospace;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3)}
+.msg-text{max-width:90%;padding:9px 13px;border-radius:11px;font-size:0.82rem;line-height:1.6}
+.msg.user .msg-text{background:rgba(79,70,229,0.1);border:1px solid rgba(79,70,229,0.22);color:var(--text);border-bottom-right-radius:3px}
+.msg.agent .msg-text{background:rgba(109,40,217,0.07);border:1px solid rgba(109,40,217,0.18);color:#c4b5fd;border-bottom-left-radius:3px}
+.msg.system .msg-text{background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.2);color:#6ee7b7;font-family:'JetBrains Mono',monospace;font-size:0.7rem;border-radius:8px;text-align:center;max-width:100%}
+.typing-dots{display:flex;gap:4px;padding:9px 13px;background:rgba(109,40,217,0.07);border:1px solid rgba(109,40,217,0.18);border-radius:11px;border-bottom-left-radius:3px}
+.typing-dots span{width:5px;height:5px;border-radius:50%;background:#a78bfa;opacity:0.3;animation:dot 1s ease-in-out infinite}
+.typing-dots span:nth-child(2){animation-delay:0.15s}.typing-dots span:nth-child(3){animation-delay:0.3s}
+@keyframes dot{0%,100%{opacity:0.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+
+.input-row{display:flex;gap:7px;padding:11px 13px;border-top:1px solid var(--border)}
+.text-inp{flex:1;background:var(--panel2);border:1px solid var(--border);border-radius:7px;padding:9px 13px;color:var(--text);font-family:'Inter',sans-serif;font-size:0.82rem;outline:none;transition:border-color 0.2s}
+.text-inp:focus{border-color:rgba(109,40,217,0.4)}
+.text-inp::placeholder{color:var(--text3)}
+.send-btn{padding:9px 16px;background:linear-gradient(135deg,var(--v2),var(--cyan2));border:none;border-radius:7px;color:#fff;font-family:'Inter',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+.send-btn:hover{opacity:0.9;box-shadow:0 4px 16px var(--gv)}
+
+/* ── RIGHT COLUMN ── */
+.right{display:flex;flex-direction:column;gap:14px}
+.panel-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.pc-title{padding:11px 14px;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:0.62rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2);display:flex;align-items:center;gap:6px}
+.pc-body{padding:12px 14px}
+
+/* Status */
+.conn-status{display:flex;align-items:center;gap:7px;padding:8px 11px;border-radius:7px;font-size:0.68rem;font-family:'JetBrains Mono',monospace}
+.conn-status.ok{background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.2);color:var(--green2)}
+.conn-status.err{background:rgba(220,38,38,0.07);border:1px solid rgba(220,38,38,0.2);color:var(--red)}
+.conn-status.checking{background:rgba(217,119,6,0.07);border:1px solid rgba(217,119,6,0.2);color:var(--amber)}
+.conn-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:blink 2s ease infinite;flex-shrink:0}
+
+/* Live booking feed */
+.booking-feed{display:flex;flex-direction:column;gap:7px;max-height:220px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.booking-item{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;font-size:0.72rem;animation:mIn 0.3s ease-out both}
+.booking-ref{font-family:'JetBrains Mono',monospace;color:#a78bfa;font-size:0.65rem;margin-bottom:3px}
+.booking-name{font-weight:600;color:var(--text);font-size:0.78rem}
+.booking-detail{color:var(--text2);margin-top:2px;font-size:0.7rem}
+.booking-empty{color:var(--text3);font-size:0.72rem;text-align:center;padding:16px 0;font-family:'JetBrains Mono',monospace}
+
+/* Tool log */
+.tool-log{display:flex;flex-direction:column;gap:5px;max-height:160px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.tool-item{display:flex;align-items:flex-start;gap:7px;padding:7px 10px;background:var(--panel2);border:1px solid var(--border);border-radius:7px;font-size:0.67rem;font-family:'JetBrains Mono',monospace;animation:mIn 0.2s ease-out both}
+.tool-name{color:#a78bfa;flex-shrink:0}
+.tool-status-ok{color:var(--green2)}.tool-status-err{color:var(--red)}.tool-status-info{color:var(--cyan2)}
+
+/* Quick actions */
+.qa-list{display:flex;flex-direction:column;gap:5px}
+.qa-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all 0.2s;font-size:0.75rem;color:var(--text2)}
+.qa-item:hover{border-color:rgba(109,40,217,0.4);color:var(--text);background:rgba(109,40,217,0.06);transform:translateX(3px)}
+.qa-icon{font-size:0.9rem;flex-shrink:0}
+.qa-arrow{margin-left:auto;opacity:0;transition:opacity 0.2s;color:var(--cyan2);font-size:0.7rem}
+.qa-item:hover .qa-arrow{opacity:1}
+
+/* Urgency badge */
+.urgency-banner{display:none;align-items:center;gap:8px;padding:9px 14px;border-radius:9px;font-size:0.75rem;font-weight:500}
+.urgency-banner.critical{display:flex;background:rgba(220,38,38,0.1);border:1px solid rgba(220,38,38,0.3);color:#fca5a5}
+.urgency-banner.high{display:flex;background:rgba(217,119,6,0.1);border:1px solid rgba(217,119,6,0.3);color:#fcd34d}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(70px);background:rgba(109,40,217,0.15);border:1px solid rgba(109,40,217,0.4);border-radius:9px;padding:9px 18px;font-size:0.72rem;color:#c4b5fd;font-family:'JetBrains Mono',monospace;transition:transform 0.3s;z-index:999;white-space:nowrap;backdrop-filter:blur(10px)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* Statusbar */
+.statusbar{border-top:1px solid var(--border);padding:8px 0;display:flex;align-items:center;gap:16px;font-size:0.6rem;font-family:'JetBrains Mono',monospace;color:var(--text3)}
+.sb-i{display:flex;align-items:center;gap:4px}
+.sb-dot{width:4px;height:4px;border-radius:50%;background:var(--text3)}
+.sb-dot.ok{background:var(--green2)}.sb-dot.warn{background:var(--amber)}
+#sb-state{color:#a78bfa}
+
+@media(max-width:780px){.main{grid-template-columns:1fr}.right{order:-1}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-icon">⚡</div>
+      <div>
+        <div class="logo-name">ShadowQuant</div>
+        <div class="logo-sub">Smart Clinic Voice Agent · Scenario 1</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="pill pill-g"><div class="pill-dot"></div>LIVE</div>
+      <div class="pill pill-v">GPT-4o</div>
+      <div class="toggle-wrap">
+        <span>Continuous</span>
+        <label class="toggle"><input type="checkbox" id="contToggle" onchange="toggleContinuous()"/><span class="toggle-sl"></span></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main">
+
+    <!-- LEFT -->
+    <div class="left">
+
+      <!-- CALL CARD -->
+      <div class="call-card">
+
+        <!-- Urgency banner (shown on high/critical) -->
+        <div class="urgency-banner" id="urgencyBanner">
+          <span id="urgencyIcon">⚠️</span>
+          <span id="urgencyText"></span>
+        </div>
+
+        <div class="call-btn-wrap IDLE" id="callWrap">
+          <div class="call-ring r1"></div>
+          <div class="call-ring r2"></div>
+          <div class="call-ring r3"></div>
+          <button class="call-btn" id="callBtn" onclick="handleCallClick()">📞</button>
+        </div>
+
+        <div class="wave" id="wave">
+          <div class="b" style="height:5px"></div><div class="b" style="height:9px"></div>
+          <div class="b" style="height:13px"></div><div class="b" style="height:7px"></div>
+          <div class="b" style="height:19px"></div><div class="b" style="height:11px"></div>
+          <div class="b" style="height:23px"></div><div class="b" style="height:13px"></div>
+          <div class="b" style="height:17px"></div><div class="b" style="height:8px"></div>
+          <div class="b" style="height:13px"></div><div class="b" style="height:5px"></div>
+        </div>
+
+        <div class="state-label IDLE" id="stateLabel">CLICK TO START CALL</div>
+        <div class="barge-hint" id="bargeHint">🎙️ Speak anytime to interrupt — Barge-in enabled</div>
+
+        <!-- Tool activity flash -->
+        <div class="tool-flash" id="toolFlash">
+          <span class="tool-icon" id="toolFlashIcon">⚙️</span>
+          <span id="toolFlashText">Checking availability…</span>
+        </div>
+
+      </div>
+
+      <!-- TRANSCRIPT -->
+      <div class="transcript-card">
+        <div class="tc-header">
+          <div class="tc-title">📋 Conversation</div>
+          <button class="clear-btn" onclick="clearChat()">Clear</button>
+        </div>
+        <div class="tc-body" id="transcript">
+          <div class="empty-msg" id="emptyMsg">
+            <div style="font-size:2rem;opacity:0.25;margin-bottom:8px">📞</div>
+            Click the call button to speak<br/>or type your message below.
+          </div>
+        </div>
+        <div class="input-row">
+          <input class="text-inp" id="textInp" placeholder='e.g. "I have chest pain, need an appointment today"' onkeydown="if(event.key==='Enter')sendText()"/>
+          <button class="send-btn" onclick="sendText()">Send</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right">
+
+      <!-- Server status -->
+      <div class="panel-card">
+        <div class="pc-title">⚙️ System</div>
+        <div class="pc-body" style="display:flex;flex-direction:column;gap:9px">
+          <div class="conn-status checking" id="connStatus">
+            <div class="conn-dot"></div><span id="connText">Connecting…</span>
+          </div>
+          <div style="font-size:0.62rem;color:var(--text3);font-family:'JetBrains Mono',monospace;line-height:1.8">
+            Tool-use agentic loop active<br/>
+            Urgency triage • Smart booking<br/>
+            Barge-in • State memory<br/>
+            Google Sheets integration
+          </div>
+        </div>
+      </div>
+
+      <!-- Live bookings feed -->
+      <div class="panel-card">
+        <div class="pc-title">📅 Live Bookings <span id="booking-count" style="margin-left:auto;background:rgba(109,40,217,0.2);border-radius:4px;padding:1px 6px;color:#a78bfa">0</span></div>
+        <div class="pc-body">
+          <div class="booking-feed" id="bookingFeed">
+            <div class="booking-empty">No bookings yet.<br/>Appointments appear here live.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tool log -->
+      <div class="panel-card">
+        <div class="pc-title">🔧 Tool Activity Log</div>
+        <div class="pc-body">
+          <div class="tool-log" id="toolLog">
+            <div style="color:var(--text3);font-size:0.65rem;font-family:'JetBrains Mono',monospace;text-align:center;padding:12px 0">Waiting for tool calls…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick scenarios -->
+      <div class="panel-card">
+        <div class="pc-title">💡 Try These Scenarios</div>
+        <div class="pc-body">
+          <div class="qa-list">
+            <div class="qa-item" onclick="fireQ(this)"><span class="qa-icon">🔴</span>I have severe chest pain and dizziness<span class="qa-arrow">→</span></div>
+            <div class="qa-item" onclick="fireQ(this)"><span class="qa-icon">🟡</span>I have high fever since 2 days, book Monday<span class="qa-arrow">→</span></div>
+            <div class="qa-item" onclick="fireQ(this)"><span class="qa-icon">🟢</span>Routine dental checkup this Saturday<span class="qa-arrow">→</span></div>
+            <div class="qa-item" onclick="fireQ(this)"><span class="qa-icon">📅</span>Book me for Sunday at 10am<span class="qa-arrow">→</span></div>
+            <div class="qa-item" onclick="fireQ(this)"><span class="qa-icon">🔄</span>Reschedule my appointment to Tuesday 3pm<span class="qa-arrow">→</span></div>
+            <div class="qa-item" onclick="fireQ(this)"><span class="qa-icon">🕐</span>What are your clinic hours?<span class="qa-arrow">→</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- STATUSBAR -->
+  <div class="statusbar">
+    <div class="sb-i"><div class="sb-dot" id="dot-server"></div>Server</div>
+    <div class="sb-i"><div class="sb-dot" id="dot-stt"></div>Mic</div>
+    <div class="sb-i"><div class="sb-dot ok"></div>GPT-4o</div>
+    <div class="sb-i"><div class="sb-dot ok"></div>Tool-Use Loop</div>
+    <div class="sb-i" style="margin-left:auto">STATE: <span id="sb-state">IDLE</span></div>
+    <div class="sb-i">TURNS: <span id="sb-turns">0</span></div>
+    <div class="sb-i">BOOKINGS: <span id="sb-bookings">0</span></div>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+let state = 'IDLE';
+let chatHistory = [];
+let recognition = null;
+let turnCount = 0;
+let isSpeaking = false;
+let continuousMode = false;
+let continuousActive = false;
+let currentUtterance = null;
+
+const BTN_ICONS = {IDLE:'📞', LISTENING:'🔴', THINKING:'⚙️', SPEAKING:'🔊', CONTINUOUS:'🎙️'};
+const STATE_LABELS = {
+  IDLE:'CLICK TO START CALL',
+  LISTENING:'LISTENING — SPEAK NOW',
+  THINKING:'PROCESSING YOUR REQUEST…',
+  SPEAKING:'SPEAKING — INTERRUPT ANYTIME',
+  CONTINUOUS:'CONTINUOUS — ALWAYS LISTENING'
+};
+
+function setState(s) {
+  state = s;
+  document.getElementById('callWrap').className = `call-btn-wrap ${s}`;
+  document.getElementById('stateLabel').className = `state-label ${s}`;
+  document.getElementById('stateLabel').textContent = STATE_LABELS[s];
+  document.getElementById('callBtn').textContent = BTN_ICONS[s];
+  document.getElementById('sb-state').textContent = s;
+  document.getElementById('wave').className = 'wave'+(s==='LISTENING'||s==='SPEAKING'?' active':'');
+  // Show barge-in hint while speaking
+  document.getElementById('bargeHint').className = 'barge-hint'+(s==='SPEAKING'?' show':'');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function flashTool(icon, text) {
+  const f = document.getElementById('toolFlash');
+  document.getElementById('toolFlashIcon').textContent = icon;
+  document.getElementById('toolFlashText').textContent = text;
+  f.classList.add('show');
+  setTimeout(() => f.classList.remove('show'), 3000);
+}
+
+// ═══════════════════════════════════════════════════
+// SERVER
+// ═══════════════════════════════════════════════════
+async function checkServer() {
+  try {
+    const r = await fetch('/api/health');
+    if (r.ok) {
+      document.getElementById('connStatus').className = 'conn-status ok';
+      document.getElementById('connText').textContent = 'ShadowQuant Agent Online';
+      document.getElementById('dot-server').classList.add('ok');
+      document.getElementById('dot-stt').classList.add(initSTT() ? 'ok' : 'warn');
+      const g = "Hello! Welcome to ShadowQuant MediCare Clinic. I'm your AI voice assistant. Are you calling to book an appointment, or do you have a medical concern you'd like to tell me about?";
+      addMsg('agent', g);
+      await speakText(g);
+      setState('IDLE');
+    } else throw new Error();
+  } catch(e) {
+    document.getElementById('connStatus').className = 'conn-status err';
+    document.getElementById('connText').textContent = 'Offline — start server.js';
+  }
+}
+
+async function sendToServer(userText) {
+  chatHistory.push({ role: 'user', content: userText });
+  const r = await fetch('/api/chat', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ messages: chatHistory })
+  });
+  if (!r.ok) { const e = await r.json(); throw new Error(e.error || `Error ${r.status}`); }
+  const data = await r.json();
+  chatHistory = data.messages;
+
+  // Process tool calls for UI
+  if (data.tool_calls?.length > 0) {
+    for (const tc of data.tool_calls) {
+      logTool(tc);
+      handleToolUI(tc);
+    }
+  }
+
+  // Update bookings count
+  if (data.bookings_count !== undefined) {
+    document.getElementById('booking-count').textContent = data.bookings_count;
+    document.getElementById('sb-bookings').textContent = data.bookings_count;
+    if (data.bookings_count > 0) refreshBookings();
+  }
+
+  return data.reply;
+}
+
+async function refreshBookings() {
+  try {
+    const r = await fetch('/api/bookings');
+    const data = await r.json();
+    const feed = document.getElementById('bookingFeed');
+    if (data.length === 0) {
+      feed.innerHTML = '<div class="booking-empty">No bookings yet.</div>';
+      return;
+    }
+    feed.innerHTML = '';
+    [...data].reverse().forEach(b => {
+      const d = document.createElement('div');
+      d.className = 'booking-item';
+      d.innerHTML = `
+        <div class="booking-ref">${b.ref} ${b.urgency==='high'?'🟡':b.urgency==='critical'?'🔴':''}</div>
+        <div class="booking-name">${b.patient_name}</div>
+        <div class="booking-detail">${b.day} at ${b.time} · ${b.doctor}</div>
+        <div class="booking-detail" style="opacity:0.6">${b.reason}</div>
+      `;
+      feed.appendChild(d);
+    });
+  } catch(e) {}
+}
+
+function logTool(tc) {
+  const log = document.getElementById('toolLog');
+  // Remove placeholder
+  const placeholder = log.querySelector('div:not(.tool-item)');
+  if (placeholder) placeholder.remove();
+
+  const icons = { assess_urgency:'🩺', check_availability:'📅', book_appointment:'✅', reschedule_appointment:'🔄', cancel_appointment:'❌', get_clinic_info:'ℹ️' };
+  const status = tc.result?.status || 'done';
+  const statusClass = status==='success'?'tool-status-ok': status==='error'?'tool-status-err':'tool-status-info';
+
+  const d = document.createElement('div');
+  d.className = 'tool-item';
+  d.innerHTML = `<span class="tool-name">${icons[tc.tool]||'⚙️'} ${tc.tool}</span><span class="${statusClass}" style="margin-left:auto">${status.toUpperCase()}</span>`;
+  log.insertBefore(d, log.firstChild);
+}
+
+function handleToolUI(tc) {
+  const icons = { assess_urgency:'🩺', check_availability:'📅', book_appointment:'✅', reschedule_appointment:'🔄', cancel_appointment:'❌', get_clinic_info:'ℹ️' };
+  const texts = { assess_urgency:'Assessing urgency…', check_availability:'Checking availability…', book_appointment:'Confirming booking…', reschedule_appointment:'Rescheduling…', cancel_appointment:'Cancelling…', get_clinic_info:'Fetching clinic info…' };
+  flashTool(icons[tc.tool]||'⚙️', texts[tc.tool]||'Processing…');
+
+  // Urgency banner
+  if (tc.tool === 'assess_urgency' && tc.result) {
+    const banner = document.getElementById('urgencyBanner');
+    const level = tc.result.urgency;
+    if (level === 'critical') {
+      banner.className = 'urgency-banner critical';
+      document.getElementById('urgencyIcon').textContent = '🚨';
+      document.getElementById('urgencyText').textContent = 'CRITICAL — Call 108 immediately!';
+    } else if (level === 'high') {
+      banner.className = 'urgency-banner high';
+      document.getElementById('urgencyIcon').textContent = '⚠️';
+      document.getElementById('urgencyText').textContent = 'HIGH URGENCY — Priority booking needed';
+    } else {
+      banner.className = 'urgency-banner';
+    }
+  }
+
+  // System message for booking confirmation
+  if (tc.tool === 'book_appointment' && tc.result?.status === 'success') {
+    addMsg('system', `✅ Booking confirmed: ${tc.result.ref} | ${tc.result.day} ${tc.result.time} | ${tc.result.doctor}`);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// AGENT TURN
+// ═══════════════════════════════════════════════════
+async function runTurn(userText) {
+  setState('THINKING'); addTyping();
+  try {
+    const reply = await sendToServer(userText);
+    removeTyping(); turnCount++;
+    document.getElementById('sb-turns').textContent = turnCount;
+    if (reply) { addMsg('agent', reply); setState('SPEAKING'); await speakText(reply); }
+  } catch(e) {
+    removeTyping();
+    addMsg('agent', `⚠️ ${e.message}`);
+  }
+  if (continuousMode && continuousActive) { setState('CONTINUOUS'); setTimeout(startListeningOnce, 600); }
+  else setState('IDLE');
+}
+
+// ═══════════════════════════════════════════════════
+// BARGE-IN: Stop speech if user starts talking
+// ═══════════════════════════════════════════════════
+function stopSpeaking() {
+  if (isSpeaking) {
+    window.speechSynthesis.cancel();
+    isSpeaking = false;
+    showToast('🎙️ Barge-in detected — listening!');
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// CONTINUOUS MODE
+// ═══════════════════════════════════════════════════
+function toggleContinuous() {
+  continuousMode = document.getElementById('contToggle').checked;
+  if (continuousMode) {
+    continuousActive = true;
+    showToast('🎙️ Continuous mode ON');
+    setState('CONTINUOUS');
+    setTimeout(startListeningOnce, 500);
+  } else {
+    continuousActive = false;
+    recognition?.stop();
+    setState('IDLE');
+    showToast('Continuous OFF');
+  }
+}
+
+function startListeningOnce() {
+  if (!continuousMode || !continuousActive || state==='THINKING' || state==='SPEAKING') return;
+  setState('LISTENING');
+  try { recognition?.start(); } catch(e){}
+}
+
+// ═══════════════════════════════════════════════════
+// STT — Web Speech API
+// ═══════════════════════════════════════════════════
+function initSTT() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return false;
+  recognition = new SR();
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.lang = 'en-IN';
+
+  recognition.onstart = () => {
+    // Stop any ongoing speech (barge-in)
+    if (isSpeaking) stopSpeaking();
+  };
+
+  recognition.onresult = e => {
+    const t = e.results[0][0].transcript;
+    // Barge-in: stop current speech immediately
+    stopSpeaking();
+    addMsg('user', t);
+    runTurn(t);
+  };
+
+  recognition.onerror = e => {
+    if (e.error === 'no-speech') {
+      if (continuousMode && continuousActive) { setState('CONTINUOUS'); setTimeout(startListeningOnce, 300); }
+      else setState('IDLE');
+      return;
+    }
+    if (e.error !== 'aborted') addMsg('agent', `⚠️ Mic: ${e.error}`);
+    setState('IDLE');
+  };
+
+  recognition.onend = () => {
+    if (continuousMode && continuousActive && state==='LISTENING') { setState('CONTINUOUS'); setTimeout(startListeningOnce, 300); }
+    else if (state==='LISTENING') setState('IDLE');
+  };
+  return true;
+}
+
+function handleCallClick() {
+  if (continuousMode) { document.getElementById('contToggle').checked=false; toggleContinuous(); return; }
+  if (state === 'SPEAKING') { stopSpeaking(); setState('IDLE'); return; }
+  if (state === 'LISTENING') { recognition?.stop(); setState('IDLE'); return; }
+  if (state !== 'IDLE') return;
+  if (!recognition) { alert('Use Chrome or Edge for voice input.'); return; }
+  setState('LISTENING');
+  try { recognition.start(); } catch(e) { recognition=null; initSTT(); recognition?.start(); }
+}
+
+// ═══════════════════════════════════════════════════
+// TEXT INPUT
+// ═══════════════════════════════════════════════════
+async function sendText() {
+  const inp = document.getElementById('textInp');
+  const t = inp.value.trim();
+  if (!t || state==='THINKING' || state==='SPEAKING') return;
+  inp.value = '';
+  if (continuousMode) recognition?.stop();
+  stopSpeaking();
+  addMsg('user', t);
+  await runTurn(t);
+}
+
+function fireQ(el) {
+  document.getElementById('textInp').value = el.textContent.replace('→','').trim().replace(/^[^\w🔴🟡🟢📅🔄🕐]+/,'').trim();
+  sendText();
+}
+
+// ═══════════════════════════════════════════════════
+// TTS with barge-in support
+// ═══════════════════════════════════════════════════
+function speakText(text) {
+  return new Promise(resolve => {
+    if (!window.speechSynthesis) { resolve(); return; }
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 1.05; u.pitch = 1.0; u.volume = 1.0; u.lang = 'en-IN';
+    const v = window.speechSynthesis.getVoices();
+    const pick = v.find(x=>x.lang==='en-IN')
+      || v.find(x=>['Samantha','Karen','Google UK English Female','Aria'].some(n=>x.name.includes(n)))
+      || v.find(x=>x.lang.startsWith('en')) || v[0];
+    if (pick) u.voice = pick;
+    isSpeaking = true;
+    currentUtterance = u;
+    u.onend = () => { isSpeaking=false; resolve(); };
+    u.onerror = () => { isSpeaking=false; resolve(); };
+    window.speechSynthesis.speak(u);
+  });
+}
+window.speechSynthesis?.addEventListener('voiceschanged',()=>{});
+
+// ═══════════════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════════════
+function addMsg(role, text) {
+  document.getElementById('emptyMsg')?.remove();
+  const t = document.getElementById('transcript');
+  const d = document.createElement('div');
+  d.className = `msg ${role}`;
+  const who = role==='user'?'👤 YOU': role==='system'?'🔧 SYSTEM':'⚡ SHADOWQUANT';
+  d.innerHTML = `<div class="msg-who">${who}</div><div class="msg-text">${esc(text)}</div>`;
+  t.appendChild(d); t.scrollTop=t.scrollHeight;
+}
+function addTyping() {
+  if (document.getElementById('typing')) return;
+  document.getElementById('emptyMsg')?.remove();
+  const t = document.getElementById('transcript');
+  const d = document.createElement('div'); d.className='msg agent'; d.id='typing';
+  d.innerHTML=`<div class="msg-who">⚡ SHADOWQUANT</div><div class="typing-dots"><span></span><span></span><span></span></div>`;
+  t.appendChild(d); t.scrollTop=t.scrollHeight;
+}
+function removeTyping(){document.getElementById('typing')?.remove()}
+function clearChat(){
+  document.getElementById('transcript').innerHTML='<div class="empty-msg" id="emptyMsg"><div style="font-size:2rem;opacity:0.25;margin-bottom:8px">📞</div>Session cleared.</div>';
+  chatHistory=[]; turnCount=0;
+  document.getElementById('sb-turns').textContent='0';
+  window.speechSynthesis?.cancel(); isSpeaking=false;
+  document.getElementById('urgencyBanner').className='urgency-banner';
+  if(!continuousMode) setState('IDLE');
 }
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br/>')}
 
